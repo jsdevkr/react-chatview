@@ -160,7 +160,6 @@ var Infinite = React.createClass({
   // The window is the block with any preloadAdditionalHeight
   // added to it.
   setStateFromScrollTop(scrollTop) {
-    //scrollTop = this.props.reverse ? scrollTop + this.props.containerHeight : scrollTop;
     var blockNumber = this.state.preloadBatchSize === 0 ? 0 : Math.floor(scrollTop / this.state.preloadBatchSize),
         blockStart = this.state.preloadBatchSize * blockNumber,
         blockEnd = blockStart + this.state.preloadBatchSize,
@@ -168,12 +167,11 @@ var Infinite = React.createClass({
         windowBottom = Math.min(this.state.infiniteComputer.getTotalScrollableHeight(),
                         blockEnd + this.state.preloadAdditionalHeight), // ?
         displayIndexStart = this.state.infiniteComputer.getDisplayIndexStart(windowTop),
-        displayIndexEnd = this.state.infiniteComputer.getDisplayIndexEnd(windowBottom),
-        numLoadedElements = this.props.children.length;
+        displayIndexEnd = this.state.infiniteComputer.getDisplayIndexEnd(windowBottom);
 
     this.setState({
-      displayIndexStart: numLoadedElements - displayIndexStart,
-      displayIndexEnd: numLoadedElements - displayIndexEnd
+      displayIndexStart: displayIndexStart,
+      displayIndexEnd: displayIndexEnd
     });
   },
 
@@ -251,17 +249,15 @@ var Infinite = React.createClass({
 
   render() {
     var children = this.props.reverse ? _clone(this.props.children).reverse() : this.props.children;
-    var start = this.props.reverse ? this.state.displayIndexEnd : this.state.displayIndexStart;
-    var end = this.props.reverse ? this.state.displayIndexStart : this.state.displayIndexEnd;
-    var displayables = children.slice(start, end + 1);
+    var displayables = children.slice(this.state.displayIndexStart, this.state.displayIndexEnd + 1);
 
     var infiniteScrollStyles = {};
     if (this.state.isScrolling) {
       infiniteScrollStyles.pointerEvents = 'none';
     }
 
-    var topSpacerHeight = this.state.infiniteComputer.getTopSpacerHeight(this.state.displayIndexEnd),
-        bottomSpacerHeight = this.state.infiniteComputer.getBottomSpacerHeight(this.state.displayIndexStart);
+    var topSpacerHeight = this.state.infiniteComputer.getTopSpacerHeight(this.state.displayIndexStart),
+        bottomSpacerHeight = this.state.infiniteComputer.getBottomSpacerHeight(this.state.displayIndexEnd);
 
     //if (this.props.reverse) {
     //  topSpacerHeight = topSpacerHeight + this.props.infiniteLoadBeginBottomOffset;

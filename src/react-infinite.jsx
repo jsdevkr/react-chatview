@@ -131,8 +131,14 @@ var Infinite = React.createClass({
   },
 
   componentDidUpdate(prevProps, prevState) {
-    if (React.Children.count(this.props.children) !== React.Children.count(prevProps.children)) {
-      this.setStateFromScrollTop(this.getScrollTop());
+    var prevCount = React.Children.count(prevProps.children);
+    var newCount = React.Children.count(this.props.children);
+    if (prevCount !== newCount) {
+      var numElementsAdded = newCount - prevCount;
+      var heightOfElementsAdded = this.state.infiniteComputer.heightData * numElementsAdded; // fixed-height computer only
+      var domScroll = this.refs.scrollable.getDOMNode();
+      domScroll.scrollTop = domScroll.scrollTop + heightOfElementsAdded;
+      this.setStateFromScrollTop(domScroll.scrollTop);
     }
   },
 

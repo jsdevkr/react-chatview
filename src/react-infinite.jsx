@@ -130,6 +130,21 @@ var Infinite = React.createClass({
       props.containerHeight;
   },
 
+  //componentWillUpdate(nextProps, nextState) {
+  //  var prevScrollHeight = this.state.infiniteComputer.getTotalScrollableHeight();
+  //  var newScrollHeight = nextState.infiniteComputer.getTotalScrollableHeight();
+  //  var deltaHeight = newScrollHeight - prevScrollHeight;
+  //
+  //  if (deltaHeight !== 0) {
+  //    var domScroll = this.refs.scrollable.getDOMNode();
+  //    if (nextProps.reverse) {
+  //      var loadingSpinnerHeight = this.refs.loadingSpinner.getDOMNode().clientHeight;
+  //      //domScroll.scrollTop = domScroll.scrollTop + deltaHeight - loadingSpinnerHeight;
+  //    }
+  //    //this.setStateFromScrollTop(domScroll.scrollTop);
+  //  }
+  //},
+
   componentDidUpdate(prevProps, prevState) {
     var prevScrollHeight = prevState.infiniteComputer.getTotalScrollableHeight();
     var newScrollHeight = this.state.infiniteComputer.getTotalScrollableHeight();
@@ -138,10 +153,10 @@ var Infinite = React.createClass({
     if (deltaHeight !== 0) {
       var domScroll = this.refs.scrollable.getDOMNode();
       if (this.props.reverse) {
-        var loadingSpinnerHeight = 0;
+        var loadingSpinnerHeight = 0; //11; this.refs.loadingSpinner.getDOMNode().clientHeight;
         domScroll.scrollTop = domScroll.scrollTop + deltaHeight - loadingSpinnerHeight;
       }
-      this.setStateFromScrollTop(domScroll.scrollTop);
+      this.setStateFromScrollTop(this.getScrollTop());
     }
   },
 

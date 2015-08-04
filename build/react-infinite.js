@@ -1,6 +1,7 @@
 var React = global.React || require('react'),
     _isArray = require('lodash.isarray'),
     _isFinite = require('lodash.isfinite'),
+    _clone = require('lodash.clone'),
     ConstantInfiniteComputer = require('./computers/constant_infinite_computer.js'),
     ArrayInfiniteComputer = require('./computers/array_infinite_computer.js');
 
@@ -30,6 +31,7 @@ var Infinite = React.createClass({displayName: "Infinite",
     ]).isRequired,
     // This is the total height of the visible window.
     containerHeight: React.PropTypes.number.isRequired,
+    reverse: React.PropTypes.bool,
 
     infiniteLoadBeginBottomOffset: React.PropTypes.number,
     onInfiniteLoad: React.PropTypes.func,
@@ -47,7 +49,8 @@ var Infinite = React.createClass({displayName: "Infinite",
       loadingSpinnerDelegate: React.createElement("div", null),
       onInfiniteLoad: function()  {},
       isInfiniteLoading: false,
-      timeScrollStateLastsForAfterUserScrolls: 150
+      timeScrollStateLastsForAfterUserScrolls: 150,
+      reverse: false
     };
   },
 
@@ -116,19 +119,43 @@ var Infinite = React.createClass({displayName: "Infinite",
   },
 
   getPreloadBatchSizeFromProps:function(props) {
-    return props.preloadBatchSize ?
+    return typeof props.preloadBatchSize === 'number' ?
       props.preloadBatchSize :
       props.containerHeight / 2;
   },
 
   getPreloadAdditionalHeightFromProps:function(props) {
-    return props.preloadAdditionalHeight ?
+    return typeof props.preloadAdditionalHeight === 'number' ?
       props.preloadAdditionalHeight :
       props.containerHeight;
   },
 
+  //componentWillUpdate(nextProps, nextState) {
+  //  var prevScrollHeight = this.state.infiniteComputer.getTotalScrollableHeight();
+  //  var newScrollHeight = nextState.infiniteComputer.getTotalScrollableHeight();
+  //  var deltaHeight = newScrollHeight - prevScrollHeight;
+  //
+  //  if (deltaHeight !== 0) {
+  //    var domScroll = this.refs.scrollable.getDOMNode();
+  //    if (nextProps.reverse) {
+  //      var loadingSpinnerHeight = this.refs.loadingSpinner.getDOMNode().clientHeight;
+  //      //domScroll.scrollTop = domScroll.scrollTop + deltaHeight - loadingSpinnerHeight;
+  //    }
+  //    //this.setStateFromScrollTop(domScroll.scrollTop);
+  //  }
+  //},
+
   componentDidUpdate:function(prevProps, prevState) {
-    if (React.Children.count(this.props.children) !== React.Children.count(prevProps.children)) {
+    var prevScrollHeight = prevState.infiniteComputer.getTotalScrollableHeight();
+    var newScrollHeight = this.state.infiniteComputer.getTotalScrollableHeight();
+    var deltaHeight = newScrollHeight - prevScrollHeight;
+
+    if (deltaHeight !== 0) {
+      var domScroll = this.refs.scrollable.getDOMNode();
+      if (this.props.reverse) {
+        var loadingSpinnerHeight = 0; //11; this.refs.loadingSpinner.getDOMNode().clientHeight;
+        domScroll.scrollTop = domScroll.scrollTop + deltaHeight - loadingSpinnerHeight;
+      }
       this.setStateFromScrollTop(this.getScrollTop());
     }
   },
@@ -138,6 +165,12 @@ var Infinite = React.createClass({displayName: "Infinite",
       if (React.Children.count(this.props.children) !== this.props.elementHeight.length) {
         throw new Error("There must be as many values provided in the elementHeight prop as there are children.")
       }
+    }
+  },
+
+  componentDidMount:function () {
+    if (this.props.reverse) {
+      this.refs.scrollable.getDOMNode().scrollTop = this.refs.scrollable.getDOMNode().scrollHeight;
     }
   },
 
@@ -151,15 +184,18 @@ var Infinite = React.createClass({displayName: "Infinite",
   // The window is the block with any preloadAdditionalHeight
   // added to it.
   setStateFromScrollTop:function(scrollTop) {
-    var blockNumber = Math.floor(scrollTop / this.state.preloadBatchSize),
+    var blockNumber = this.state.preloadBatchSize === 0 ? 0 : Math.floor(scrollTop / this.state.preloadBatchSize),
         blockStart = this.state.preloadBatchSize * blockNumber,
         blockEnd = blockStart + this.state.preloadBatchSize,
-        windowTop = Math.max(0, blockStart - this.state.preloadAdditionalHeight),
+        windowTop = Math.max(0, blockStart - this.state.preloadAdditionalHeight), // ?
         windowBottom = Math.min(this.state.infiniteComputer.getTotalScrollableHeight(),
-                        blockEnd + this.state.preloadAdditionalHeight)
+                        blockEnd + this.state.preloadAdditionalHeight), // ?
+        displayIndexStart = this.state.infiniteComputer.getDisplayIndexStart(windowTop),
+        displayIndexEnd = this.state.infiniteComputer.getDisplayIndexEnd(windowBottom);
+
     this.setState({
-      displayIndexStart: this.state.infiniteComputer.getDisplayIndexStart(windowTop),
-      displayIndexEnd: this.state.infiniteComputer.getDisplayIndexEnd(windowBottom)
+      displayIndexStart: displayIndexStart,
+      displayIndexEnd: displayIndexEnd
     });
   },
 
@@ -197,15 +233,25 @@ var Infinite = React.createClass({displayName: "Infinite",
   handleScroll:function(scrollTop) {
     this.manageScrollTimeouts();
     this.setStateFromScrollTop(scrollTop);
-    var infiniteScrollBottomLimit = scrollTop >
-        (this.state.infiniteComputer.getTotalScrollableHeight() -
+
+    var infiniteScrollLimit;
+    if (this.props.reverse) {
+      infiniteScrollLimit = scrollTop < this.props.infiniteLoadBeginBottomOffset;
+    }
+    else {
+      infiniteScrollLimit = scrollTop >
+          (this.state.infiniteComputer.getTotalScrollableHeight() -
           this.props.containerHeight -
           this.props.infiniteLoadBeginBottomOffset);
-    if (infiniteScrollBottomLimit && !this.state.isInfiniteLoading) {
+    }
+
+    if (infiniteScrollLimit && !this.state.isInfiniteLoading) { // change this condition
       this.setState({
         isInfiniteLoading: true
       });
       this.props.onInfiniteLoad();
+      // in reverse mode, after the infinite load, fix up the scroll, because the new
+      // children just pushed down the child we were just looking at
     }
   },
 
@@ -226,8 +272,8 @@ var Infinite = React.createClass({displayName: "Infinite",
   },
 
   render:function() {
-    var displayables = this.props.children.slice(this.state.displayIndexStart,
-                                                 this.state.displayIndexEnd + 1);
+    var children = this.props.reverse ? _clone(this.props.children).reverse() : this.props.children;
+    var displayables = children.slice(this.state.displayIndexStart, this.state.displayIndexEnd + 1);
 
     var infiniteScrollStyles = {};
     if (this.state.isScrolling) {
@@ -237,6 +283,15 @@ var Infinite = React.createClass({displayName: "Infinite",
     var topSpacerHeight = this.state.infiniteComputer.getTopSpacerHeight(this.state.displayIndexStart),
         bottomSpacerHeight = this.state.infiniteComputer.getBottomSpacerHeight(this.state.displayIndexEnd);
 
+    //if (this.props.reverse) {
+    //  topSpacerHeight = topSpacerHeight + this.props.infiniteLoadBeginBottomOffset;
+    //  bottomSpacerHeight = bottomSpacerHeight + this.props.infiniteLoadBeginBottomOffset;
+    //}
+
+    var loadSpinner = React.createElement("div", {ref: "loadingSpinner"}, 
+      this.state.isInfiniteLoading ? this.props.loadingSpinnerDelegate : null
+    );
+
     // topSpacer and bottomSpacer take up the amount of space that the
     // rendered elements would have taken up otherwise
     return React.createElement("div", {className: this.props.className ? this.props.className : '', 
@@ -244,14 +299,13 @@ var Infinite = React.createClass({displayName: "Infinite",
                 style: this.buildScrollableStyle(), 
                 onScroll: this.infiniteHandleScroll}, 
       React.createElement("div", {ref: "smoothScrollingWrapper", style: infiniteScrollStyles}, 
+        this.props.reverse ? loadSpinner : null, 
         React.createElement("div", {ref: "topSpacer", 
              style: this.buildHeightStyle(topSpacerHeight)}), 
             displayables, 
         React.createElement("div", {ref: "bottomSpacer", 
              style: this.buildHeightStyle(bottomSpacerHeight)}), 
-        React.createElement("div", {ref: "loadingSpinner"}, 
-             this.state.isInfiniteLoading ? this.props.loadingSpinnerDelegate : null
-        )
+        this.props.reverse ? null : loadSpinner
       )
     );
   }

@@ -131,13 +131,16 @@ var Infinite = React.createClass({
   },
 
   componentDidUpdate(prevProps, prevState) {
-    var prevCount = React.Children.count(prevProps.children);
-    var newCount = React.Children.count(this.props.children);
-    if (prevCount !== newCount) {
-      var numElementsAdded = newCount - prevCount;
-      var heightOfElementsAdded = this.state.infiniteComputer.heightData * numElementsAdded; // fixed-height computer only
+    var prevScrollHeight = prevState.infiniteComputer.getTotalScrollableHeight();
+    var newScrollHeight = this.state.infiniteComputer.getTotalScrollableHeight();
+    var deltaHeight = newScrollHeight - prevScrollHeight;
+
+    if (deltaHeight !== 0) {
       var domScroll = this.refs.scrollable.getDOMNode();
-      domScroll.scrollTop = domScroll.scrollTop + heightOfElementsAdded;
+      if (this.props.reverse) {
+        var loadingSpinnerHeight = 0;
+        domScroll.scrollTop = domScroll.scrollTop + deltaHeight - loadingSpinnerHeight;
+      }
       this.setStateFromScrollTop(domScroll.scrollTop);
     }
   },
@@ -270,13 +273,9 @@ var Infinite = React.createClass({
     //  bottomSpacerHeight = bottomSpacerHeight + this.props.infiniteLoadBeginBottomOffset;
     //}
 
-    var bottomLoadSpinner = this.props.reverse ? null : <div ref="loadingSpinner">
+    var loadSpinner = <div ref="loadingSpinner">
       {this.state.isInfiniteLoading ? this.props.loadingSpinnerDelegate : null}
     </div>;
-
-    var topLoadSpinner = this.props.reverse ? <div ref="loadingSpinner">
-      {this.state.isInfiniteLoading ? this.props.loadingSpinnerDelegate : null}
-    </div> : null;
 
     // topSpacer and bottomSpacer take up the amount of space that the
     // rendered elements would have taken up otherwise
@@ -285,13 +284,13 @@ var Infinite = React.createClass({
                 style={this.buildScrollableStyle()}
                 onScroll={this.infiniteHandleScroll}>
       <div ref="smoothScrollingWrapper" style={infiniteScrollStyles}>
-        {topLoadSpinner}
+        {this.props.reverse ? loadSpinner : null}
         <div ref="topSpacer"
              style={this.buildHeightStyle(topSpacerHeight)}/>
             {displayables}
         <div ref="bottomSpacer"
              style={this.buildHeightStyle(bottomSpacerHeight)}/>
-        {bottomLoadSpinner}
+        {this.props.reverse ? null : loadSpinner}
       </div>
     </div>;
   }

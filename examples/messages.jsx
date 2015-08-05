@@ -21,7 +21,7 @@ var ListItem = React.createClass({
 function buildMessages (N) {
     var ms = [];
     for (var i = 0; i < N; ++i) {
-        var sentence = words({min: 3, max: 3}).join(" ");
+        var sentence = words({min: 3, max: 50}).join(" ");
         var record = { text: sentence };
         ms.push(record);
     }
@@ -50,14 +50,14 @@ var Messages = React.createClass({
 
     render: function() {
         var elements = this.state.messages.map(function (record) {
-            var style = { height: 50, lineHeight: '50px'};
+            var style = { height: 100 };
             return <div className="infinite-list-item" style={style}>{record.text}</div>;
         });
 
         var loadSpinner = <div className="infinite-list-item">Loading...</div>;
 
         // must pre-compute height of all elements
-        return <Infinite elementHeight={50}
+        return <Infinite elementHeight={100}
                          containerHeight={250}
                          // reverse={true}
                          infiniteLoadBeginBottomOffset={200}

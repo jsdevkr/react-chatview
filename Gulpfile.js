@@ -18,7 +18,7 @@ var args = require('yargs').alias('P', 'production')
 gulp.task('build', function() {
   // Build standalone bundle for the browser
   var b = browserify({
-        entries: './src/react-infinite.jsx',
+        entries: './src/react-infinite2.jsx',
         standalone: 'Infinite'
       })
       .transform(reactify, {

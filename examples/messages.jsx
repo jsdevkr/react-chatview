@@ -38,16 +38,20 @@ var Messages = React.createClass({
         var loadSpinner = <div className="infinite-list-item">Loading...</div>;
 
         // must pre-compute height of all elements
-        return <Infinite elementHeight={100}
-                         containerHeight={250}
-                         // reverse={true}
-                         infiniteLoadBeginBottomOffset={200}
-                         onInfiniteLoad={this.handleInfiniteLoad}
-                         loadingSpinnerDelegate={loadSpinner}
-                         isInfiniteLoading={this.state.isInfiniteLoading}
-                         timeScrollStateLastsForAfterUserScrolls={1000}>
-            {elements}
-        </Infinite>;
+        return (
+            <Infinite
+                maxChildren={15}
+                elementHeight={100}
+                containerHeight={250}
+                // reverse={true}
+                infiniteLoadBeginBottomOffset={200}
+                onInfiniteLoad={this.handleInfiniteLoad}
+                loadingSpinnerDelegate={loadSpinner}
+                isInfiniteLoading={this.state.isInfiniteLoading}
+                timeScrollStateLastsForAfterUserScrolls={1000}>
+                {elements}
+            </Infinite>
+        );
     }
 });
 

@@ -6,60 +6,60 @@ var ListItem = React.createClass({
         }
     },
     render: function() {
-
-        return <div className="infinite-list-item" style={
-            {
-                height: this.props.height,
-                lineHeight: this.props.lineHeight
-            }
-        }>
+        var style = {
+            height: this.props.height,
+            lineHeight: this.props.lineHeight
+        };
+        return <div className="infinite-list-item" style={style}>
             List Item {this.props.index}
         </div>;
     }
 });
 
+// var sentence = words({min: 8, max: 12}).join(" ");
+
+function buildMessages (N) {
+    var ms = [];
+    for (var i = 0; i < N; ++i) {
+        var sentence = words({min: 3, max: 3}).join(" ");
+        var record = { text: sentence };
+        ms.push(record);
+    }
+    return ms;
+}
 
 
+// Backwards, scrolling up lazy loads old messges, and new messages can come in any time.
 var Messages = React.createClass({
     getInitialState: function() {
         return {
-            elementHeights: this.generateVariableElementHeights(100),
+            messages: buildMessages(25),
             isInfiniteLoading: false
         };
     },
 
-    generateVariableElementHeights: function(number, minimum, maximum) {
-        minimum = minimum || 40;
-        maximum = maximum || 100;
-        var heights = [];
-        for (var i = 0; i < number; i++) {
-            heights.push(minimum + Math.floor(Math.random() * (maximum - minimum)));
-        }
-        return heights;
-    },
-
     handleInfiniteLoad: function() {
-        var that = this;
         this.setState({ isInfiniteLoading: true });
         setTimeout(function() {
-            var newElements = that.generateVariableElementHeights(100);
-            that.setState({
+            this.setState({
                 isInfiniteLoading: false,
-                elementHeights: that.state.elementHeights.concat(newElements)
+                messages: this.state.messages.concat(buildMessages(25))
             });
-        }, 2500);
+        }.bind(this), 2500);
     },
 
     render: function() {
-        var elements = this.state.elementHeights.map(function(el, i) {
-            return <ListItem key={i} index={i} height={el} lineHeight={el.toString() + "px"}/>;
+        var elements = this.state.messages.map(function (record) {
+            var style = { height: 50, lineHeight: '50px'};
+            return <div className="infinite-list-item" style={style}>{record.text}</div>;
         });
 
         var loadSpinner = <div className="infinite-list-item">Loading...</div>;
 
-        return <Infinite elementHeight={this.state.elementHeights}
+        // must pre-compute height of all elements
+        return <Infinite elementHeight={50}
                          containerHeight={250}
-                         reverse={true}
+                         // reverse={true}
                          infiniteLoadBeginBottomOffset={200}
                          onInfiniteLoad={this.handleInfiniteLoad}
                          loadingSpinnerDelegate={loadSpinner}

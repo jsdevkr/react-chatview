@@ -1,22 +1,3 @@
-var ListItem = React.createClass({
-    getDefaultProps: function() {
-        return {
-            height: 50,
-            lineHeight: "50px"
-        }
-    },
-    render: function() {
-        var style = {
-            height: this.props.height,
-            lineHeight: this.props.lineHeight
-        };
-        return <div className="infinite-list-item" style={style}>
-            List Item {this.props.index}
-        </div>;
-    }
-});
-
-// var sentence = words({min: 8, max: 12}).join(" ");
 
 function buildMessages (N) {
     var ms = [];

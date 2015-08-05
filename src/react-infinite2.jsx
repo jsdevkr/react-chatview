@@ -14,6 +14,7 @@ var Infinite = React.createClass({
     containerHeight: React.PropTypes.number.isRequired, // total height of the visible window.
     reverse: React.PropTypes.bool,
     handleScroll: React.PropTypes.func, // What is this for? Not used in examples.
+    timeScrollStateLastsForAfterUserScrolls: React.PropTypes.number,
 
     className: React.PropTypes.string
   },
@@ -23,14 +24,19 @@ var Infinite = React.createClass({
       reverse: false,
       loadingSpinnerDelegate: <div/>,
       handleScroll: () => {},
+      timeScrollStateLastsForAfterUserScrolls: 150,
       className: ''
     };
   },
 
   getInitialState () {
     return {
-      displayIndexStart: 0
+      displayIndexStart: 0,
       // don't need displayIndexEnd
+      scrollTimeout: undefined,
+      isScrolling: false,
+
+      measuredHeights: [] // actual heights of items measured from dom as we see them
     };
   },
 
@@ -63,10 +69,52 @@ var Infinite = React.createClass({
   },
 
   onScroll (e) {
+    var scrollTop = e.target.scrollTop;
     if (e.target !== this.refs.scrollable.getDOMNode()) { return; } // can this be an assert
-
     this.props.handleScroll(this.refs.scrollable.getDOMNode());
-    //this.handleScroll(e.target.scrollTop);
+    //this.handleScroll(scrollTop);
+  },
+
+  handleScroll (scrollTop) {
+    this.manageScrollTimeouts();
+    this.setStateFromScrollTop(scrollTop);
+    console.assert(!this.props.reverse, 'reverse unimplemented');
+
+    // have we reached scrollLimit to trigger load?
+    // - If we don’t know all the heights, no we haven’t.
+    // - If we do know all the heights, we know totalScrollableHeight
+    if (false) {
+
+    }
+    else {
+      var triggerLoad = scrollTop >
+          (this.state.infiniteComputer.getTotalScrollableHeight() -
+          this.props.containerHeight -
+          this.props.infiniteLoadBeginBottomOffset);
+    }
+
+  },
+
+  manageScrollTimeouts() {
+    // Maintains a series of timeouts to set this.state.isScrolling
+    // to be true when the element is scrolling.
+
+    if (this.state.scrollTimeout) {
+      clearTimeout(this.state.scrollTimeout);
+    }
+
+    var that = this,
+        scrollTimeout = setTimeout(() => {
+          that.setState({
+            isScrolling: false,
+            scrollTimeout: undefined
+          })
+        }, this.props.timeScrollStateLastsForAfterUserScrolls);
+
+    this.setState({
+      isScrolling: true,
+      scrollTimeout: scrollTimeout
+    });
   },
 
   componentWillReceiveProps () {
@@ -76,11 +124,44 @@ var Infinite = React.createClass({
     })
   },
 
-  componentDidUpdate () {
+  componentDidMount () {
+    var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item');
 
+    // Measure the heights of the item DOM nodes as rendered and laid out.
+    // We have not measured their heights yet.
+
+    // Do not store this in React state, because the view doesn't depend on them
+    // and we don't want to cause a re-render.
+    this.measuredHeights = measureChildHeights(domItems);
+  },
+
+  componentDidUpdate () {
+    var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item');
+
+    // Measure item node heights again because they may have changed.
+    var updatedHeights = measureChildHeights(domItems);
+
+    // in-place replacement of accumulated heights at this range with new measurements
+    spliceArraySegmentAt(this.measuredHeights, this.state.displayIndexStart, updatedHeights);
   }
 });
 
+
+function spliceArraySegmentAt(arrayRef, start, newArray) {
+  var splice_args = [start, newArray.length].concat(newArray);
+  var MAX_NUM_FN_ARGS = 32766;
+  console.assert(splice_args.length < MAX_NUM_FN_ARGS, 'http://stackoverflow.com/questions/22747068/');
+  Array.prototype.splice.apply(arrayRef, splice_args);
+}
+
+
+function measureChildHeights (domItems) {
+  var xs = [];
+  for (var i=0; i<domItems.length; ++i) {
+    xs.push(domItems[i].clientHeight);
+  }
+  return xs;
+}
 
 
 function buildHeightStyle (height) {

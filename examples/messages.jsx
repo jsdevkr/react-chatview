@@ -31,7 +31,7 @@ var Messages = React.createClass({
 
     render: function() {
         var elements = this.state.messages.map(function (record) {
-            var style = { height: 100 };
+            var style = { height: undefined };
             return <div className="infinite-list-item" style={style}>{record.text}</div>;
         });
 

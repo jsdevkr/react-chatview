@@ -2,8 +2,8 @@ var React = global.React || require('react');
 var _isArray = require('lodash.isarray');
 var _isFinite = require('lodash.isfinite');
 var _clone = require('lodash.clone');
-var ConstantInfiniteComputer = require('./computers/constant_infinite_computer.js');
-var ArrayInfiniteComputer = require('./computers/array_infinite_computer.js');
+var _takeWhile = require('lodash.takewhile');
+var _sum = require('lodash.sum');
 
 
 var Infinite = React.createClass({
@@ -15,6 +15,8 @@ var Infinite = React.createClass({
     reverse: React.PropTypes.bool,
     handleScroll: React.PropTypes.func, // What is this for? Not used in examples.
     timeScrollStateLastsForAfterUserScrolls: React.PropTypes.number,
+    infiniteLoadBeginBottomOffset: React.PropTypes.number,
+    preloadAdditionalHeight: React.PropTypes.number,
 
     className: React.PropTypes.string
   },
@@ -30,13 +32,15 @@ var Infinite = React.createClass({
   },
 
   getInitialState () {
+    this.measuredHeights = []; // actual heights of items measured from dom as we see them
+    // Stored out-of-band of react state because the view doesn't depend on this, only scroll handlers,
+    // we don't want to trigger component updates when we compute it.
+
     return {
       displayIndexStart: 0,
       // don't need displayIndexEnd
       scrollTimeout: undefined,
-      isScrolling: false,
-
-      measuredHeights: [] // actual heights of items measured from dom as we see them
+      isScrolling: false
     };
   },
 
@@ -69,30 +73,48 @@ var Infinite = React.createClass({
   },
 
   onScroll (e) {
+    // Order of effects here is unchanged from react-infinite, don't yet understand them
+
     var scrollTop = e.target.scrollTop;
     if (e.target !== this.refs.scrollable.getDOMNode()) { return; } // can this be an assert
     this.props.handleScroll(this.refs.scrollable.getDOMNode());
-    //this.handleScroll(scrollTop);
-  },
 
-  handleScroll (scrollTop) {
     this.manageScrollTimeouts();
-    this.setStateFromScrollTop(scrollTop);
+
     console.assert(!this.props.reverse, 'reverse unimplemented');
+    var viewTop = Math.max(0, scrollTop - this.preloadAdditionalHeight());
+
+
+    // sum the heights until heights >= viewTop
+    // number of heights is displayIndexStart
+    var distances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
+    var displayIndexStart = _takeWhile(distances, (d) => { return d <= viewTop; }).length;
+
+    this.setState({ displayIndexStart: displayIndexStart });
+
 
     // have we reached scrollLimit to trigger load?
     // - If we don’t know all the heights, no we haven’t.
     // - If we do know all the heights, we know totalScrollableHeight
-    if (false) {
 
+    // Have we measured all the children's height?
+    // If we haven't seen all the nodes, we aren't ready to trigger a load. -- this is wrongish
+
+    var allHeightsKnown = React.Children.count(this.props.children) === this.measuredHeights.length;
+    if (!allHeightsKnown) {
+      // not at the end - don't trigger load
     }
     else {
-      var triggerLoad = scrollTop >
-          (this.state.infiniteComputer.getTotalScrollableHeight() -
+      var totalScrollableHeight = _sum(this.measuredHeights);
+      var triggerLoad = (scrollTop >
+          totalScrollableHeight -
           this.props.containerHeight -
           this.props.infiniteLoadBeginBottomOffset);
+      if (triggerLoad && !this.state.isInfiniteLoading) {
+        this.setState({ isInfiniteLoading: true });
+        this.props.onInfiniteLoad();
+      }
     }
-
   },
 
   manageScrollTimeouts() {
@@ -143,8 +165,26 @@ var Infinite = React.createClass({
 
     // in-place replacement of accumulated heights at this range with new measurements
     spliceArraySegmentAt(this.measuredHeights, this.state.displayIndexStart, updatedHeights);
+  },
+
+  preloadAdditionalHeight () {
+    return typeof this.props.preloadAdditionalHeight === 'number' ?
+        this.props.preloadAdditionalHeight :
+        this.props.containerHeight;
   }
 });
+
+
+function reductions (coll, iteratee) {
+  var steps = [];
+  var sum = coll.reduce((acc, val, i) => {
+    steps.push(acc);
+    var acc = iteratee(acc, val, i);
+    return acc;
+  });
+  steps.push(sum);
+  return steps;
+}
 
 
 function spliceArraySegmentAt(arrayRef, start, newArray) {

@@ -64,4 +64,4 @@ var Messages = React.createClass({
 });
 
 
-React.render(<Messages />, document.getElementById('messages-example'));
+window.app = React.render(<Messages />, document.getElementById('messages-example'));

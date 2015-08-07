@@ -93,7 +93,7 @@ var Infinite = React.createClass({
             // We haven't measured all the children, so leave enough downward scroll room for
             // at least one more screenful of results.
             return totalScrollableHeightSeen + this.props.containerHeight;
-          }.bind(this));
+          }.bind(this)());
     var bottomSpacerHeight = totalScrollableHeight - this.measuredDistances[displayIndexEnd];
 
 
@@ -170,10 +170,13 @@ var Infinite = React.createClass({
     });
   },
 
-  componentWillReceiveProps () {
-    // New children, so recompute our state.
+  componentWillReceiveProps (nextProps) {
     this.setState({
-      displayIndexStart: this.state.displayIndexStart
+      // preloadBatchSize
+      // preloadAdditionalHeight
+      displayIndexStart: this.state.displayIndexStart,
+      isInfiniteLoading: nextProps.isInfiniteLoading !== undefined
+          ? nextProps.isInfiniteLoading : this.state.isInfiniteLoading
     })
   },
 

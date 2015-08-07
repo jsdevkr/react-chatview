@@ -82,13 +82,11 @@ var Infinite = React.createClass({
     // The bottom spacer is the height of elided items below the displayable segment
     // This height is only knowable if we have seen and measured all the items' height.
     // Exact measurement is only needed as we approach the bottom to prevent over-scrolling.
+    // If we don't know the height, just leave enough downward scroll room for at least
+    // one more screenful of results
     var totalScrollableHeight = allHeightsKnown
         ? this.measuredDistances[numItemsMeasured-1]
-        : (function () {
-            // We haven't measured all the children, so leave enough downward scroll room for
-            // at least one more screenful of results.
-            return totalScrollableHeightSeen + this.props.containerHeight;
-          }.bind(this)());
+        : totalScrollableHeightSeen + this.props.containerHeight;
     var bottomSpacerHeight = totalScrollableHeight - this.measuredDistances[displayIndexEnd];
 
 

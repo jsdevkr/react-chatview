@@ -4,6 +4,7 @@ var _isFinite = require('lodash.isfinite');
 var _clone = require('lodash.clone');
 var _takeWhile = require('lodash.takewhile');
 var _sum = require('lodash.sum');
+var bs = require('./utils/binary_index_search');
 
 
 var Infinite = React.createClass({
@@ -45,7 +46,26 @@ var Infinite = React.createClass({
   },
 
   render () {
-    var displayIndexEnd = this.state.displayIndexStart + this.props.maxChildren*2;
+    // If we don't know the exact height of the scroll area, we can't exactly
+    // compute displayIndexEnd and bottomSpacerHeight - so use a rough guess.
+    // It only matters once the last items are in the dom, and we can exactly compute
+    // everything in that circumstance.
+    var allHeightsKnown = React.Children.count(this.props.children) === this.measuredHeights.length;
+    var distances = reductions(this.measuredHeights, (acc, val) => { return acc+val; }, 0);
+
+    // If we haven't measured all the children, this is only the height of children we've seen so far.
+    var totalScrollableHeightSeen = distances[distances.length-1];
+
+    var displayIndexEnd = allHeightsKnown
+        ? (function () {
+            var scrollTop = this.refs.scrollable.getDOMNode().scrollTop;
+            var windowBottom = Math.min(totalScrollableHeightSeen, scrollTop + this.preloadAdditionalHeight())
+            var foundIndex = bs.binaryIndexSearch(distances, windowBottom, bs.opts.CLOSEST_HIGHER);
+            return typeof foundIndex === 'undefined'
+                ? distances.length - 1
+                : foundIndex; // this is off-by-one from the result i expected (50, expected 49), but works.
+          }.bind(this)())
+        : this.state.displayIndexStart + this.props.maxChildren * 2; // why times two?
 
     var children = this.props.reverse ? _clone(this.props.children).reverse() : this.props.children;
     var displayables = children.slice(this.state.displayIndexStart, displayIndexEnd + 1);
@@ -58,15 +78,22 @@ var Infinite = React.createClass({
 
     // The top spacer is exactly the height of the list items that ought to be in the dom, but
     // are not visible thus removed.
-    var distances = reductions(this.measuredHeights, (acc, val) => { return acc+val; }, 0);
     var topSpacerHeight = distances[this.state.displayIndexStart];
 
     // How accurate does this need to be? Can we guess at it and touch up later?
     // We don't have an exact displayIndexEnd, or totalHeight.
     // This determines how far down we can scroll past the elements that are in dom now.
     // 0px means we can't scroll past what's in the dom.
-    var totalHeight = 2500;
-    var bottomSpacerHeight = totalHeight - distances[displayIndexEnd];
+
+
+    var totalScrollableHeight = allHeightsKnown
+        ? distances[distances.length-1]
+        : (function () {
+            // We haven't measured all the children, so leave enough downward scroll room for
+            // at least one more screenful of results.
+            return totalScrollableHeightSeen + this.props.containerHeight;
+          }.bind(this));
+    var bottomSpacerHeight = totalScrollableHeight - distances[displayIndexEnd];
 
 
     return (

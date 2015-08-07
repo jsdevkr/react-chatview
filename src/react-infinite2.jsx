@@ -45,7 +45,7 @@ var Infinite = React.createClass({
   },
 
   render () {
-    var displayIndexEnd = this.state.displayIndexStart + this.props.maxChildren;
+    var displayIndexEnd = this.state.displayIndexStart + this.props.maxChildren*2;
 
     var children = this.props.reverse ? _clone(this.props.children).reverse() : this.props.children;
     var displayables = children.slice(this.state.displayIndexStart, displayIndexEnd + 1);
@@ -54,8 +54,19 @@ var Infinite = React.createClass({
       {this.state.isInfiniteLoading ? this.props.loadingSpinnerDelegate : null}
     </div>;
 
-    var topSpacerHeight = undefined; //this.state.infiniteComputer.getTopSpacerHeight(this.state.displayIndexStart),
-    var bottomSpacerHeight = undefined; //this.state.infiniteComputer.getBottomSpacerHeight(this.state.displayIndexEnd);
+
+
+    // The top spacer is exactly the height of the list items that ought to be in the dom, but
+    // are not visible thus removed.
+    var distances = reductions(this.measuredHeights, (acc, val) => { return acc+val; }, 0);
+    var topSpacerHeight = distances[this.state.displayIndexStart];
+
+    // How accurate does this need to be? Can we guess at it and touch up later?
+    // We don't have an exact displayIndexEnd, or totalHeight.
+    // This determines how far down we can scroll past the elements that are in dom now.
+    // 0px means we can't scroll past what's in the dom.
+    var totalHeight = 2500;
+    var bottomSpacerHeight = totalHeight - distances[displayIndexEnd];
 
 
     return (
@@ -87,12 +98,13 @@ var Infinite = React.createClass({
 
     // sum the heights until heights >= viewTop
     // number of heights is displayIndexStart
-    var distances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
-    var displayIndexStart = _takeWhile(distances, (d) => { return d <= viewTop; }).length;
+    var distances = reductions(this.measuredHeights, (acc, val) => { return acc+val; }, 0);
+    var displayIndexStart = _takeWhile(distances, (d) => { return d < viewTop; }).length;
 
     this.setState({ displayIndexStart: displayIndexStart });
 
 
+    return;
     // have we reached scrollLimit to trigger load?
     // - If we don’t know all the heights, no we haven’t.
     // - If we do know all the heights, we know totalScrollableHeight
@@ -175,13 +187,13 @@ var Infinite = React.createClass({
 });
 
 
-function reductions (coll, iteratee) {
+function reductions (coll, iteratee, seed) {
   var steps = [];
   var sum = coll.reduce((acc, val, i) => {
     steps.push(acc);
     var acc = iteratee(acc, val, i);
     return acc;
-  });
+  }, seed);
   steps.push(sum);
   return steps;
 }

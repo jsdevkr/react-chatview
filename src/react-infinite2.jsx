@@ -74,18 +74,12 @@ var Infinite = React.createClass({
       {this.state.isInfiniteLoading ? this.props.loadingSpinnerDelegate : null}
     </div>;
 
-
-
-    // The top spacer is exactly the height of the list items that ought to be in the dom, but
-    // are not visible thus removed.
+    // The top spacer is exactly the height of the elided items above the displayable segment
     var topSpacerHeight = distances[this.state.displayIndexStart];
 
-    // How accurate does this need to be? Can we guess at it and touch up later?
-    // We don't have an exact displayIndexEnd, or totalHeight.
-    // This determines how far down we can scroll past the elements that are in dom now.
-    // 0px means we can't scroll past what's in the dom.
-
-
+    // The bottom spacer is the height of elided items below the displayable segment
+    // This height is only knowable if we have seen and measured all the items' height.
+    // Exact measurement is only needed as we approach the bottom to prevent over-scrolling.
     var totalScrollableHeight = allHeightsKnown
         ? distances[distances.length-1]
         : (function () {

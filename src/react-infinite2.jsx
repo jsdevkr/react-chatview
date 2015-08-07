@@ -18,6 +18,7 @@ var Infinite = React.createClass({
     timeScrollStateLastsForAfterUserScrolls: React.PropTypes.number,
     infiniteLoadBeginBottomOffset: React.PropTypes.number,
     preloadAdditionalHeight: React.PropTypes.number,
+    onInfiniteLoad: React.PropTypes.func,
 
     className: React.PropTypes.string
   },
@@ -34,6 +35,7 @@ var Infinite = React.createClass({
 
   getInitialState () {
     this.measuredHeights = []; // actual heights of items measured from dom as we see them
+    this.measuredDistances = []; // computed pixel distance of each item from the window top
     // Stored out-of-band of react state because the view doesn't depend on this, only scroll handlers,
     // we don't want to trigger component updates when we compute it.
 
@@ -45,24 +47,29 @@ var Infinite = React.createClass({
     };
   },
 
+  componentWillMount () {
+
+    this.measuredHeights = [];
+  },
+
   render () {
     // If we don't know the exact height of the scroll area, we can't exactly
     // compute displayIndexEnd and bottomSpacerHeight - so use a rough guess.
     // It only matters once the last items are in the dom, and we can exactly compute
     // everything in that circumstance.
     var allHeightsKnown = React.Children.count(this.props.children) === this.measuredHeights.length;
-    var distances = reductions(this.measuredHeights, (acc, val) => { return acc+val; }, 0);
+    var numItemsMeasured = this.measuredDistances.length;
 
     // If we haven't measured all the children, this is only the height of children we've seen so far.
-    var totalScrollableHeightSeen = distances[distances.length-1];
+    var totalScrollableHeightSeen = this.measuredDistances[numItemsMeasured-1];
 
     var displayIndexEnd = allHeightsKnown
         ? (function () {
             var scrollTop = this.refs.scrollable.getDOMNode().scrollTop;
             var windowBottom = Math.min(totalScrollableHeightSeen, scrollTop + this.preloadAdditionalHeight())
-            var foundIndex = bs.binaryIndexSearch(distances, windowBottom, bs.opts.CLOSEST_HIGHER);
+            var foundIndex = bs.binaryIndexSearch(this.measuredDistances, windowBottom, bs.opts.CLOSEST_HIGHER);
             return typeof foundIndex === 'undefined'
-                ? distances.length - 1
+                ? numItemsMeasured - 1
                 : foundIndex; // this is off-by-one from the result i expected (50, expected 49), but works.
           }.bind(this)())
         : this.state.displayIndexStart + this.props.maxChildren * 2; // why times two?
@@ -75,19 +82,19 @@ var Infinite = React.createClass({
     </div>;
 
     // The top spacer is exactly the height of the elided items above the displayable segment
-    var topSpacerHeight = distances[this.state.displayIndexStart];
+    var topSpacerHeight = this.measuredDistances[this.state.displayIndexStart];
 
     // The bottom spacer is the height of elided items below the displayable segment
     // This height is only knowable if we have seen and measured all the items' height.
     // Exact measurement is only needed as we approach the bottom to prevent over-scrolling.
     var totalScrollableHeight = allHeightsKnown
-        ? distances[distances.length-1]
+        ? this.measuredDistances[numItemsMeasured-1]
         : (function () {
             // We haven't measured all the children, so leave enough downward scroll room for
             // at least one more screenful of results.
             return totalScrollableHeightSeen + this.props.containerHeight;
           }.bind(this));
-    var bottomSpacerHeight = totalScrollableHeight - distances[displayIndexEnd];
+    var bottomSpacerHeight = totalScrollableHeight - this.measuredDistances[displayIndexEnd];
 
 
     return (
@@ -109,45 +116,36 @@ var Infinite = React.createClass({
 
     var scrollTop = e.target.scrollTop;
     if (e.target !== this.refs.scrollable.getDOMNode()) { return; } // can this be an assert
-    this.props.handleScroll(this.refs.scrollable.getDOMNode());
+    this.props.handleScroll(this.refs.scrollable.getDOMNode()); // react-infinite exposed this prop, but what value does it have?
 
     this.manageScrollTimeouts();
 
     console.assert(!this.props.reverse, 'reverse unimplemented');
     var viewTop = Math.max(0, scrollTop - this.preloadAdditionalHeight());
 
-
     // sum the heights until heights >= viewTop
     // number of heights is displayIndexStart
-    var distances = reductions(this.measuredHeights, (acc, val) => { return acc+val; }, 0);
-    var displayIndexStart = _takeWhile(distances, (d) => { return d < viewTop; }).length;
-
+    var displayIndexStart = _takeWhile(this.measuredDistances, (d) => { return d < viewTop; }).length;
     this.setState({ displayIndexStart: displayIndexStart });
 
+    if (this.shouldTriggerLoad(scrollTop)) {
+      this.setState({ isInfiniteLoading: true });
+      this.props.onInfiniteLoad();
+    }
 
-    return;
-    // have we reached scrollLimit to trigger load?
-    // - If we don’t know all the heights, no we haven’t.
-    // - If we do know all the heights, we know totalScrollableHeight
+  },
 
-    // Have we measured all the children's height?
-    // If we haven't seen all the nodes, we aren't ready to trigger a load. -- this is wrongish
-
+  shouldTriggerLoad (scrollTop) {
     var allHeightsKnown = React.Children.count(this.props.children) === this.measuredHeights.length;
     if (!allHeightsKnown) {
-      // not at the end - don't trigger load
+      return false; // If we haven't seen all the nodes, we aren't ready to trigger a load. -- this is wrongish
     }
-    else {
-      var totalScrollableHeight = _sum(this.measuredHeights);
-      var triggerLoad = (scrollTop >
-          totalScrollableHeight -
-          this.props.containerHeight -
-          this.props.infiniteLoadBeginBottomOffset);
-      if (triggerLoad && !this.state.isInfiniteLoading) {
-        this.setState({ isInfiniteLoading: true });
-        this.props.onInfiniteLoad();
-      }
-    }
+
+    var totalScrollableHeight = this.measuredDistances[this.measuredDistances.length-1];
+    var whatIsThisNumber = totalScrollableHeight - this.props.containerHeight - this.props.infiniteLoadBeginBottomOffset;
+    var triggerLoad = (scrollTop > whatIsThisNumber);
+
+    return triggerLoad && !this.state.isInfiniteLoading;
   },
 
   manageScrollTimeouts() {
@@ -188,6 +186,7 @@ var Infinite = React.createClass({
     // Do not store this in React state, because the view doesn't depend on them
     // and we don't want to cause a re-render.
     this.measuredHeights = measureChildHeights(domItems);
+    this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; }, 0);
   },
 
   componentDidUpdate () {
@@ -198,6 +197,7 @@ var Infinite = React.createClass({
 
     // in-place replacement of accumulated heights at this range with new measurements
     spliceArraySegmentAt(this.measuredHeights, this.state.displayIndexStart, updatedHeights);
+    this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; }, 0);
   },
 
   preloadAdditionalHeight () {

@@ -47,11 +47,6 @@ var Infinite = React.createClass({
     };
   },
 
-  componentWillMount () {
-
-    this.measuredHeights = [];
-  },
-
   render () {
     // If we don't know the exact height of the scroll area, we can't exactly
     // compute displayIndexEnd and bottomSpacerHeight - so use a rough guess.

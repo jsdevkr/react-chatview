@@ -55,7 +55,7 @@ var InfiniteList = React.createClass({
     },
 
     render: function() {
-        return <Infinite elementHeight={50}
+        return <Infinite maxChildren={5}
                          containerHeight={250}
                          infiniteLoadBeginBottomOffset={200}
                          onInfiniteLoad={this.handleInfiniteLoad}
@@ -109,7 +109,7 @@ var AdditionInfiniteList = React.createClass({
     },
 
     render: function() {
-        return <Infinite elementHeight={50}
+        return <Infinite maxChildren={5}
                          containerHeight={250}
                          loadingSpinnerDelegate={this.elementInfiniteLoad()}
                          isInfiniteLoading={this.state.isInfiniteLoading}
@@ -158,7 +158,7 @@ var VariableInfiniteList = React.createClass({
         var elements = this.state.elementHeights.map(function(el, i) {
             return <ListItem key={i} index={i} height={el} lineHeight={el.toString() + "px"}/>;
         });
-        return <Infinite elementHeight={this.state.elementHeights}
+        return <Infinite maxChildren={5}
                          containerHeight={250}
                          infiniteLoadBeginBottomOffset={200}
                          onInfiniteLoad={this.handleInfiniteLoad}

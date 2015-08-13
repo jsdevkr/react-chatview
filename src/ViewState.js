@@ -80,7 +80,7 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
   /**
    * displayablesHeight is not knowable until after render as we measure it from the browser layout.
    */
-  var displayablesHeight = allHeightsMeasured
+  var displayablesHeight = anyHeightsMeasured
       ? measuredDistances[visibleEnd-1] - measuredDistances[visibleStart]
       : undefined;
 
@@ -106,11 +106,11 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
    * one more screenful of results.
    */
   var backSpace;
-  if (anyHeightsMeasured) {
-    backSpace = measuredChildrenHeight - measuredDistances[visibleEnd-1];
-  }
-  else if (allHeightsMeasured) {
+  if (allHeightsMeasured) {
     backSpace = perfectChildrenHeight - measuredDistances[visibleEnd-1];
+  }
+  else if (anyHeightsMeasured) {
+    backSpace = displayablesHeight - measuredDistances[visibleEnd-1];
   }
   else {
     // don't have any height data on first render,

@@ -51,7 +51,7 @@ var Infinite = React.createClass({
         this.state.scrollTop,
         React.Children.count(this.props.children),
         this.props.maxChildren);
-    this.viewState = viewState; // current viewState is needed in event handlers too
+    this.viewState = viewState; // calculated viewState is needed in events and lifecycle methods.
 
     var children = this.props.reverse ? _clone(this.props.children).reverse() : this.props.children;
     var displayables = children.slice(viewState.visibleStart, viewState.visibleEnd);
@@ -163,7 +163,7 @@ var Infinite = React.createClass({
     var updatedHeights = measureChildHeights(domItems);
 
     // in-place replacement of accumulated heights at this range with new measurements
-    spliceArraySegmentAt(this.measuredHeights, this.state.displayIndexStart, updatedHeights);
+    spliceArraySegmentAt(this.measuredHeights, this.viewState.visibleStart, updatedHeights);
     this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
 
     this.writeDiagnostics();

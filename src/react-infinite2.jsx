@@ -50,6 +50,7 @@ var Infinite = React.createClass({
         this.state.scrollTop,
         React.Children.count(this.props.children),
         this.props.maxChildren);
+    this.viewState = viewState; // current viewState is needed in event handlers too
 
     var children = this.props.reverse ? _clone(this.props.children).reverse() : this.props.children;
     var displayables = children.slice(viewState.visibleStart, viewState.visibleEnd);
@@ -86,21 +87,25 @@ var Infinite = React.createClass({
 
     this.setState({ scrollTop: scrollTop });
 
-    //if (this.shouldTriggerLoad(scrollTop)) {
-    //  this.setState({ isInfiniteLoading: true });
-    //  this.props.onInfiniteLoad();
-    //}
+    if (this.shouldTriggerLoad(scrollTop)) {
+      this.setState({ isInfiniteLoading: true });
+      this.props.onInfiniteLoad();
+    }
 
   },
 
   shouldTriggerLoad (scrollTop) {
-    var allHeightsKnown = React.Children.count(this.props.children) === this.measuredHeights.length;
-    if (!allHeightsKnown) {
+    var viewState = this.viewState;
+
+    if (!viewState.allHeightsMeasured) {
       return false; // If we haven't seen all the nodes, we aren't ready to trigger a load. -- this is wrongish
     }
 
-    var totalScrollableHeight = this.measuredDistances[this.measuredDistances.length-1];
-    var whatIsThisNumber = totalScrollableHeight - this.props.containerHeight - this.props.infiniteLoadBeginBottomOffset;
+    //var totalScrollableHeight = this.measuredDistances[this.measuredDistances.length-1];
+    var whatIsThisNumber =
+        viewState.measuredChildrenHeight -
+        viewState.apertureHeight -
+        this.props.infiniteLoadBeginBottomOffset;
     var triggerLoad = (scrollTop > whatIsThisNumber);
 
     return triggerLoad && !this.state.isInfiniteLoading;

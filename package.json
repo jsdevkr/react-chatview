@@ -66,7 +66,8 @@
     "lodash.isfinite": "^3.0.0",
     "lodash.clone": "^3.0.0",
     "lodash.takewhile": "^3.0.0",
-    "lodash.sum": "^3.0.0"
+    "lodash.sum": "^3.0.0",
+    "lodash.last": "^3.0.0"
   },
   "peerDependencies": {
     "react": ">= 0.12.2"

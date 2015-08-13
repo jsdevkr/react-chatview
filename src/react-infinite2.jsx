@@ -63,7 +63,7 @@ var Infinite = React.createClass({
 
     return (
       <div className={this.props.className} ref="scrollable" onScroll={this.onScroll}
-           style={buildScrollableStyle(viewState.viewHeight)}>
+           style={buildScrollableStyle(viewState.apertureHeight)}>
         <div ref="smoothScrollingWrapper" style={this.state.isScrolling ? { pointerEvents: 'none' } : {}}>
           {this.props.reverse ? loadSpinner : null}
           <div ref="topSpacer" style={buildHeightStyle(topSpace)}/>

@@ -137,18 +137,25 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
     visibleEnd: visibleEnd,
     frontSpace: frontSpace,
     backSpace: backSpace,
+
     apertureHeight: apertureHeight,
     apertureBottom: apertureBottom,
     apertureTop: apertureTop,
+
     numItemsMeasured: numItemsMeasured,
     anyHeightsMeasured: anyHeightsMeasured,
     allHeightsMeasured: allHeightsMeasured,
     perfectChildrenHeight: perfectChildrenHeight,
     measuredChildrenHeight: measuredChildrenHeight,
     displayablesHeight: displayablesHeight,
+
     //scrollableHeight: scrollableHeight,   -- is this needed?
     perfectScrollableHeight: perfectScrollableHeight,
-    measuredScrollableHeight: measuredScrollableHeight
+    measuredScrollableHeight: measuredScrollableHeight,
+
+    numChildren: numChildren,
+    maxChildrenPerScreen: maxChildrenPerScreen
+    //,measuredDistances: measuredDistances
   };
 }
 

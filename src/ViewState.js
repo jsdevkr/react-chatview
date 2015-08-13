@@ -20,7 +20,7 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
    * sum the heights until heights >= apertureTop, number of heights is visibleStart.
    */
   var apertureTop = scrollTop; //var apertureTop = Math.max(0, scrollTop - apertureHeight);
-  var visibleStart = _takeWhile(this.measuredDistances, (d) => { return d < apertureTop; }).length;
+  var visibleStart = _takeWhile(measuredDistances, (d) => { return d < apertureTop; }).length;
 
 
   var numItemsMeasured = measuredDistances.length;
@@ -80,10 +80,28 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
   /**
    * displayablesHeight is not knowable until after render as we measure it from the browser layout.
    * visibleStart=0 means zero distance. This indexing is weird, I'm not sure why.
+   *
+   * On the first render/frame that adds new, not-yet-measured item, we will have an incorrect
+   * displayablesHeight because we can't compute it prefectly until it actually hits the dom.
+   * That's okay - just use the previous displayablesHeight. We're probably only off by a few pixels.
    */
-  var displayablesHeight = anyHeightsMeasured
-      ? measuredDistances[visibleEnd-1] - (visibleStart > 0 ? measuredDistances[visibleStart-1] : 0)
-      : undefined;
+
+
+  var displayablesHeight;
+  if (anyHeightsMeasured) {
+    // may be past the end of measuredHeights if we haven't yet measured these now-visible items.
+    // Don't want this value undefined if anyHeightsMeasured, because backSpace depends on it.
+    // Fallback to the last value we have. backSpacer is an approximation anyway.
+    var endHeight = measuredDistances[visibleEnd-1] || _last(measuredDistances);
+    var startHeight = (visibleStart > 0 ? measuredDistances[visibleStart-1] : 0); // why is this case special?
+    displayablesHeight = endHeight - startHeight;
+  }
+  else {
+    displayablesHeight = undefined;
+  }
+  //var displayablesHeight = anyHeightsMeasured
+  //    ? measuredDistances[visibleEnd-1] - (visibleStart > 0 ? measuredDistances[visibleStart-1] : 0)
+  //    : undefined;
 
   /**
    * The top spacer is exactly the height of the elided items above the displayable segment.
@@ -113,7 +131,8 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
   else if (anyHeightsMeasured) {
     // Don't have all the heights, so we know there is more we haven't seen/measured,
     // and we don't know how much more. Leave an extra screenful of room to scroll down.
-    backSpace = displayablesHeight - measuredDistances[visibleEnd-1] + apertureHeight;
+    // If we have now-visible items that aren't measured yet, fallback to the last value we have.
+    backSpace = displayablesHeight - (measuredDistances[visibleEnd-1] || _last(measuredDistances)) + apertureHeight;
   }
   else {
     // don't have any height data on first render,

@@ -42,7 +42,7 @@ var Messages = React.createClass({
             <div className="Messages">
                 <Infinite
                     maxChildren={15}
-                    containerHeight={500}
+                    containerHeight={400}
                     // reverse={true}
                     infiniteLoadBeginBottomOffset={200}
                     onInfiniteLoad={this.handleInfiniteLoad}

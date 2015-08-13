@@ -209,9 +209,9 @@ function buildHeightStyle (height) {
 }
 
 
-function buildScrollableStyle(containerHeight) {
+function buildScrollableStyle(apertureHeight) {
   return {
-    height: containerHeight,
+    height: apertureHeight,
     overflowX: 'hidden',
     overflowY: 'scroll'
   };

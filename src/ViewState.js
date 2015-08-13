@@ -9,7 +9,7 @@ var bs = require('./utils/binary_index_search');
  *    some items measured (subsequent renders)
  *    all items measured (last few renders before infinite load)
  *
- * aperture: which is the fixed view of visible items
+ * aperture: which is the fixed view of visible items. domEl ref "scrollable"
  * apertureHeight: height of the visible items view/window
  **/
 

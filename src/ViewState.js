@@ -86,15 +86,20 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
    * That's okay - just use the previous displayablesHeight. We're probably only off by a few pixels.
    */
 
+  // may be past the end of measuredHeights if we haven't yet measured these now-visible items.
+  // Don't want this value undefined if anyHeightsMeasured, because backSpace depends on it.
+  // Fallback to prior render's value. BackSpacer is an approximation anyway.
+  console.assert(visibleEnd >= numItemsMeasured);
+  var numNewlyVisibleItems = visibleEnd - numItemsMeasured;
+  console.assert(numNewlyVisibleItems >= 0);
+  var visibleEndHeight = measuredDistances[visibleEnd-numNewlyVisibleItems-1];
+  var visibleStartHeight = (visibleStart-numNewlyVisibleItems > 0 // why is this case special?
+      ? measuredDistances[visibleStart-numNewlyVisibleItems-1]
+      : 0);
 
   var displayablesHeight;
   if (anyHeightsMeasured) {
-    // may be past the end of measuredHeights if we haven't yet measured these now-visible items.
-    // Don't want this value undefined if anyHeightsMeasured, because backSpace depends on it.
-    // Fallback to the last value we have. backSpacer is an approximation anyway.
-    var endHeight = measuredDistances[visibleEnd-1] || _last(measuredDistances);
-    var startHeight = (visibleStart > 0 ? measuredDistances[visibleStart-1] : 0); // why is this case special?
-    displayablesHeight = endHeight - startHeight;
+    displayablesHeight = visibleEndHeight - visibleStartHeight;
   }
   else {
     displayablesHeight = undefined;
@@ -132,7 +137,7 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
     // Don't have all the heights, so we know there is more we haven't seen/measured,
     // and we don't know how much more. Leave an extra screenful of room to scroll down.
     // If we have now-visible items that aren't measured yet, fallback to the last value we have.
-    backSpace = displayablesHeight - (measuredDistances[visibleEnd-1] || _last(measuredDistances)) + apertureHeight;
+    backSpace = displayablesHeight - visibleEndHeight + apertureHeight;
   }
   else {
     // don't have any height data on first render,
@@ -143,6 +148,8 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
 
   // Some sanity checks and documentation of assumptions.
   console.assert(apertureBottom - apertureTop === apertureHeight);
+  console.assert(_isFinite(visibleStartHeight) && visibleStartHeight >= 0);
+  console.assert(visibleEndHeight === undefined || (_isFinite(visibleEndHeight) && visibleEndHeight >= 0));
   console.assert(_isFinite(frontSpace) && frontSpace >= 0);
   console.assert(_isFinite(backSpace) && backSpace >= 0);
   console.assert(_isFinite(visibleStart) && visibleStart >= 0 && visibleStart <= numChildren);
@@ -157,6 +164,8 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
   return {
     visibleStart: visibleStart,
     visibleEnd: visibleEnd,
+    visibleStartHeight: visibleStartHeight,
+    visibleEndHeight: visibleEndHeight,
     frontSpace: frontSpace,
     backSpace: backSpace,
 

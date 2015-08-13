@@ -87,8 +87,15 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
   /**
    * The top spacer is exactly the height of the elided items above the displayable segment.
    * If we don' have the measurements yet, we know we're at the beginning so no spacer needed.
+   * visibleStart=0 means 0 space.
    */
-  var frontSpace = measuredDistances.length > 0 ? measuredDistances[visibleStart] : 0;
+  var frontSpace;
+  if (visibleStart === 0) {
+    frontSpace = 0;
+  }
+  else {
+    frontSpace = anyHeightsMeasured ? measuredDistances[visibleStart-1] : 0;
+  }
 
 
   /**

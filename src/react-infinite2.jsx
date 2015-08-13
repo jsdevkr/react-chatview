@@ -52,7 +52,7 @@ var Infinite = React.createClass({
         this.props.maxChildren);
 
     var children = this.props.reverse ? _clone(this.props.children).reverse() : this.props.children;
-    var displayables = children.slice(viewState.visibleStart, viewState.visibleEnd + 1);
+    var displayables = children.slice(viewState.visibleStart, viewState.visibleEnd);
 
     var loadSpinner = <div ref="loadingSpinner">
       {this.state.isInfiniteLoading ? this.props.loadingSpinnerDelegate : null}
@@ -145,7 +145,7 @@ var Infinite = React.createClass({
     // Do not store this in React state, because the view doesn't depend on them
     // and we don't want to cause a re-render.
     this.measuredHeights = measureChildHeights(domItems);
-    this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; }, 0);
+    this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
   },
 
   componentDidUpdate () {
@@ -156,7 +156,7 @@ var Infinite = React.createClass({
 
     // in-place replacement of accumulated heights at this range with new measurements
     spliceArraySegmentAt(this.measuredHeights, this.state.displayIndexStart, updatedHeights);
-    this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; }, 0);
+    this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
   }
 });
 
@@ -164,11 +164,16 @@ var Infinite = React.createClass({
 
 function reductions (coll, iteratee, seed) {
   var steps = [];
-  var sum = coll.reduce((acc, val, i) => {
+
+  var innerIteratee = (acc, val, i) => {
     steps.push(acc);
-    var acc = iteratee(acc, val, i);
-    return acc;
-  }, seed);
+    return iteratee(acc, val, i);
+  };
+
+  var sum = seed === undefined
+      ? coll.reduce(innerIteratee) // undefined seed would be used as the accumulator
+      : coll.reduce(innerIteratee, seed);
+
   steps.push(sum);
   return steps;
 }

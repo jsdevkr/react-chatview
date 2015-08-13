@@ -66,7 +66,7 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
 
   //var apertureBottom = Math.min(totalScrollableHeightSeen, scrollTop + viewHeight); // wut
   var apertureBottom = scrollTop + apertureHeight;
-  var visibleEnd;
+  var visibleEnd; // not inclusive.. Math range notation: [visibleStart, visibleEnd)
   if (allHeightsMeasured) {
     var foundIndex = bs.binaryIndexSearch(measuredDistances, apertureBottom, bs.opts.CLOSEST_HIGHER);
     // foundIndex is off-by-one from the result i expected (50, expected 49), but works.
@@ -81,7 +81,7 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
    * displayablesHeight is not knowable until after render as we measure it from the browser layout.
    */
   var displayablesHeight = allHeightsMeasured
-      ? measuredDistances[visibleEnd] - measuredDistances[visibleStart]
+      ? measuredDistances[visibleEnd-1] - measuredDistances[visibleStart]
       : undefined;
 
   /**
@@ -100,10 +100,10 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
    */
   var backSpace;
   if (anyHeightsMeasured) {
-    backSpace = measuredChildrenHeight - measuredDistances[visibleEnd];
+    backSpace = measuredChildrenHeight - measuredDistances[visibleEnd-1];
   }
   else if (allHeightsMeasured) {
-    backSpace = perfectChildrenHeight - measuredDistances[visibleEnd];
+    backSpace = perfectChildrenHeight - measuredDistances[visibleEnd-1];
   }
   else {
     // don't have any height data on first render,

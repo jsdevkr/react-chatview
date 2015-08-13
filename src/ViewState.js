@@ -79,9 +79,10 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
 
   /**
    * displayablesHeight is not knowable until after render as we measure it from the browser layout.
+   * visibleStart=0 means zero distance. This indexing is weird, I'm not sure why.
    */
   var displayablesHeight = anyHeightsMeasured
-      ? measuredDistances[visibleEnd-1] - measuredDistances[visibleStart]
+      ? measuredDistances[visibleEnd-1] - (visibleStart > 0 ? measuredDistances[visibleStart-1] : 0)
       : undefined;
 
   /**
@@ -110,7 +111,9 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
     backSpace = perfectChildrenHeight - measuredDistances[visibleEnd-1];
   }
   else if (anyHeightsMeasured) {
-    backSpace = displayablesHeight - measuredDistances[visibleEnd-1];
+    // Don't have all the heights, so we know there is more we haven't seen/measured,
+    // and we don't know how much more. Leave an extra screenful of room to scroll down.
+    backSpace = displayablesHeight - measuredDistances[visibleEnd-1] + apertureHeight;
   }
   else {
     // don't have any height data on first render,

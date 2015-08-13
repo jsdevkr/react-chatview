@@ -15,6 +15,7 @@ var Infinite = React.createClass({
     infiniteLoadBeginBottomOffset: React.PropTypes.number,
     onInfiniteLoad: React.PropTypes.func,
 
+    diagnosticsDomElId: React.PropTypes.string,
     className: React.PropTypes.string
   },
 
@@ -151,6 +152,8 @@ var Infinite = React.createClass({
     // and we don't want to cause a re-render.
     this.measuredHeights = measureChildHeights(domItems);
     this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
+
+    this.writeDiagnostics();
   },
 
   componentDidUpdate () {
@@ -162,6 +165,20 @@ var Infinite = React.createClass({
     // in-place replacement of accumulated heights at this range with new measurements
     spliceArraySegmentAt(this.measuredHeights, this.state.displayIndexStart, updatedHeights);
     this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
+
+    this.writeDiagnostics();
+  },
+
+  writeDiagnostics () {
+    if (this.props.diagnosticsDomElId) {
+      var diagnostics = {
+        reactState: this.state,
+        viewState: this.viewState
+      };
+      var diagnosticsString = JSON.stringify(diagnostics, undefined, 2);
+      var domEl = document.getElementById(this.props.diagnosticsDomElId);
+      domEl.textContent = diagnosticsString;
+    }
   }
 });
 

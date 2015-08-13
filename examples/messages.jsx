@@ -48,10 +48,12 @@ var Messages = React.createClass({
                     onInfiniteLoad={this.handleInfiniteLoad}
                     loadingSpinnerDelegate={loadSpinner}
                     isInfiniteLoading={this.state.isInfiniteLoading}
-                    timeScrollStateLastsForAfterUserScrolls={1000}>
+                    timeScrollStateLastsForAfterUserScrolls={1000}
+                    diagnosticsDomElId="diagnostics">
                     {elements}
                 </Infinite>
                 <button onClick={this.receiveNewMessage}>Receive New Message</button>
+                <pre id="diagnostics"></pre>
             </div>
         );
     },

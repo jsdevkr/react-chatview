@@ -143,10 +143,10 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
 
   // Some sanity checks and documentation of assumptions.
   console.assert(apertureBottom - apertureTop === apertureHeight);
-  console.assert(_isFinite(frontSpace));
-  console.assert(_isFinite(backSpace));
-  console.assert(_isFinite(visibleStart));
-  console.assert(_isFinite(visibleEnd));
+  console.assert(_isFinite(frontSpace) && frontSpace >= 0);
+  console.assert(_isFinite(backSpace) && backSpace >= 0);
+  console.assert(_isFinite(visibleStart) && visibleStart >= 0 && visibleStart <= numChildren);
+  console.assert(_isFinite(visibleEnd) && visibleEnd >= 0 && visibleEnd <= numChildren);
   console.assert(_isFinite(apertureHeight));
   console.assert(_isFinite(apertureBottom));
   console.assert(_isFinite(perfectChildrenHeight) || perfectChildrenHeight === undefined);

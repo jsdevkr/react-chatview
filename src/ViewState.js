@@ -16,11 +16,11 @@ var bs = require('./utils/binary_index_search');
 function computeViewState (apertureHeight, measuredDistances, scrollTop, numChildren, maxChildrenPerScreen) {
 
   /**
-   * viewTop is pixel distance from top of scrollable to first visible node.
-   * sum the heights until heights >= viewTop, number of heights is visibleStart.
+   * apertureTop is pixel distance from top of scrollable to first visible node.
+   * sum the heights until heights >= apertureTop, number of heights is visibleStart.
    */
-  var viewTop = scrollTop; //var viewTop = Math.max(0, scrollTop - apertureHeight);
-  var visibleStart = _takeWhile(this.measuredDistances, (d) => { return d < viewTop; }).length;
+  var apertureTop = scrollTop; //var apertureTop = Math.max(0, scrollTop - apertureHeight);
+  var visibleStart = _takeWhile(this.measuredDistances, (d) => { return d < apertureTop; }).length;
 
 
   var numItemsMeasured = measuredDistances.length;
@@ -120,7 +120,7 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
 
 
   // Some sanity checks and documentation of assumptions.
-  console.assert(apertureBottom - viewTop === apertureHeight);
+  console.assert(apertureBottom - apertureTop === apertureHeight);
   console.assert(_isFinite(frontSpace));
   console.assert(_isFinite(backSpace));
   console.assert(_isFinite(visibleStart));

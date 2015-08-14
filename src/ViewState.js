@@ -74,7 +74,7 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
     visibleEnd = found ? foundIndex : numItemsMeasured - 1;
     }
   else {
-    visibleEnd = visibleStart + maxChildrenPerScreen * 2;
+    visibleEnd = visibleStart + maxChildrenPerScreen;
   }
 
   /**

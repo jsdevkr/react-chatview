@@ -102,9 +102,6 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
   else {
     displayablesHeight = undefined;
   }
-  //var displayablesHeight = anyHeightsMeasured
-  //    ? measuredDistances[visibleEnd-1] - (visibleStart > 0 ? measuredDistances[visibleStart-1] : 0)
-  //    : undefined;
 
   /**
    * The top spacer is exactly the height of the elided items above the displayable segment.

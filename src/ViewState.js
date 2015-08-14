@@ -62,7 +62,6 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
   var visibleEnd; // not inclusive.. Math range notation: [visibleStart, visibleEnd)
   if (allHeightsMeasured) {
     var foundIndex = bs.binaryIndexSearch(measuredDistances, apertureBottom, bs.opts.CLOSEST_HIGHER);
-    // foundIndex is off-by-one from the result i expected (50, expected 49), but works.
     var found = typeof foundIndex !== 'undefined';
     visibleEnd = found
         ? foundIndex + 1 // don't understand why we are off by one here.
@@ -71,6 +70,10 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
   else {
     visibleEnd = visibleStart + maxChildrenPerScreen;
   }
+  // add ANOTHER maxChildrenPerScreen, which are never visible, so we always have room to scroll
+  // down. Doing it this way, rather then adding apertureHeight to the backSpace, ensures that
+  // if we scroll all the way down we bump into the bottom and can't scroll past the last child.
+  visibleEnd = visibleEnd + maxChildrenPerScreen;
 
   /**
    * displayablesHeight is not knowable until after render as we measure it from the browser layout.
@@ -134,7 +137,8 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
     // If we have now-visible items that aren't measured yet, fallback to the last value we have.
     // The measuredChildrenHeight should monotonically increase over time.
     // measuredScrollableHeight should also, except for the loadSpinner.
-    backSpace = measuredChildrenHeight - visibleEndHeight + apertureHeight;
+    backSpace = measuredChildrenHeight - visibleEndHeight;
+    // the visibleEndHeight accounts for extra screenful of visible children, which are never onscreen
   }
   else {
     // don't have any height data on first render,

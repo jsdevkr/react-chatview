@@ -132,7 +132,7 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
     // If we have now-visible items that aren't measured yet, fallback to the last value we have.
     // The measuredChildrenHeight should monotonically increase over time.
     // measuredScrollableHeight should also, except for the loadSpinner.
-    backSpace = measuredChildrenHeight - displayablesHeight + apertureHeight;
+    backSpace = measuredChildrenHeight - visibleEndHeight + apertureHeight;
   }
   else {
     // don't have any height data on first render,
@@ -147,8 +147,10 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
    * These values aren't used, they are just for diagnostics.
    */
   var perfectScrollableHeight = perfectChildrenHeight; // [+ loadspinner]
-  var measuredScrollableHeight = measuredChildrenHeight + backSpace; // [+ loadspinner]
-
+  var measuredScrollableHeight = frontSpace + displayablesHeight + backSpace /*+loadSpinner*/;
+  if (anyHeightsMeasured) {
+    console.assert(measuredScrollableHeight >= measuredChildrenHeight);
+  }
 
   // Some sanity checks and documentation of assumptions.
   console.assert(apertureBottom - apertureTop === apertureHeight);
@@ -164,9 +166,7 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
   console.assert(_isFinite(displayablesHeight) || displayablesHeight === undefined);
   console.assert(_isFinite(measuredChildrenHeight) || measuredChildrenHeight === undefined);
 
-  if (anyHeightsMeasured) {
-    console.assert(frontSpace + displayablesHeight + backSpace /*+loadSpinner*/ >= measuredScrollableHeight)
-  }
+
 
 
   return {

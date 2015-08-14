@@ -64,7 +64,9 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
     var foundIndex = bs.binaryIndexSearch(measuredDistances, apertureBottom, bs.opts.CLOSEST_HIGHER);
     // foundIndex is off-by-one from the result i expected (50, expected 49), but works.
     var found = typeof foundIndex !== 'undefined';
-    visibleEnd = found ? foundIndex : numItemsMeasured - 1;
+    visibleEnd = found
+        ? foundIndex + 1 // don't understand why we are off by one here.
+        : numItemsMeasured;
     }
   else {
     visibleEnd = visibleStart + maxChildrenPerScreen;

@@ -45,7 +45,8 @@ var Infinite = React.createClass({
 
   render () {
 
-    var viewState = ViewState.computeViewState(
+    this.prevViewState = this.viewState;
+    var viewState = ViewState.computeViewState( // move to willUpdate?
         this.props.containerHeight,
         this.measuredDistances,
         this.state.scrollTop,
@@ -156,10 +157,12 @@ var Infinite = React.createClass({
     this.writeDiagnostics();
   },
 
-  componentDidUpdate () {
-    var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item');
+  componentDidUpdate (prevProps, prevState) {
+    console.assert(this.viewState.measuredChildrenHeight >= this.prevViewState.measuredChildrenHeight
+        || this.prevViewState.measuredChildrenHeight === undefined);
 
     // Measure item node heights again because they may have changed.
+    var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item');
     var updatedHeights = measureChildHeights(domItems);
 
     // in-place replacement of accumulated heights at this range with new measurements

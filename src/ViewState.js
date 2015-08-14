@@ -48,13 +48,6 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
    */
   var scrollableHeight = undefined;
 
-  /**
-   * scrollableHeight is different than perfectScrollableHeight,
-   * which if all heights known, = last(measuredDistances) [+ loadSpiner]
-   */
-  var perfectScrollableHeight = perfectChildrenHeight; // [+ loadspinner]
-  var measuredScrollableHeight = measuredChildrenHeight; // [+ loadspinner]
-
 
   /**
    * If we don't know the exact desired scrollHeight, we can't compute visibleEnd,
@@ -137,7 +130,8 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
     // Don't have all the heights, so we know there is more we haven't seen/measured,
     // and we don't know how much more. Leave an extra screenful of room to scroll down.
     // If we have now-visible items that aren't measured yet, fallback to the last value we have.
-    // The measuredScrollableHeight should monotonically increase over time.
+    // The measuredChildrenHeight should monotonically increase over time.
+    // measuredScrollableHeight should also, except for the loadSpinner.
     backSpace = measuredChildrenHeight - displayablesHeight + apertureHeight;
   }
   else {
@@ -145,6 +139,15 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
     // leave about a screenful of room to scroll down.
     backSpace = apertureHeight;
   }
+
+
+  /**
+   * scrollableHeight is different than perfectScrollableHeight,
+   * which if all heights known, = last(measuredDistances) [+ loadSpiner]
+   * These values aren't used, they are just for diagnostics.
+   */
+  var perfectScrollableHeight = perfectChildrenHeight; // [+ loadspinner]
+  var measuredScrollableHeight = measuredChildrenHeight + backSpace; // [+ loadspinner]
 
 
   // Some sanity checks and documentation of assumptions.

@@ -84,14 +84,13 @@ var Infinite = React.createClass({
     this.manageScrollTimeouts();
 
     var scrollTop = e.target.scrollTop;
-    
-    this.setState({ scrollTop: scrollTop });
-
     if (this.shouldTriggerLoad(scrollTop)) {
-      this.setState({ isInfiniteLoading: true });
+      this.setState({ isInfiniteLoading: true, scrollTop: scrollTop });
       this.props.onInfiniteLoad();
     }
-
+    else {
+      this.setState({ scrollTop: scrollTop });
+    }
   },
 
   shouldTriggerLoad (scrollTop) {

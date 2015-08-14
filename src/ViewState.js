@@ -137,8 +137,8 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
     // Don't have all the heights, so we know there is more we haven't seen/measured,
     // and we don't know how much more. Leave an extra screenful of room to scroll down.
     // If we have now-visible items that aren't measured yet, fallback to the last value we have.
-    //backSpace = visibleEndHeight - displayablesHeight + apertureHeight;
-    backSpace = measuredChildrenHeight + apertureHeight;
+    // The measuredScrollableHeight should monotonically increase over time.
+    backSpace = measuredChildrenHeight - displayablesHeight + apertureHeight;
   }
   else {
     // don't have any height data on first render,

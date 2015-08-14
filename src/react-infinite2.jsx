@@ -79,12 +79,12 @@ var Infinite = React.createClass({
   },
 
   onScroll (e) {
-    var scrollTop = e.target.scrollTop;
-    if (e.target !== this.refs.scrollable.getDOMNode()) { return; } // can this be an assert
-    this.props.handleScroll(this.refs.scrollable.getDOMNode()); // react-infinite exposed this prop, but what value does it have?
+    console.assert(e.target === this.refs.scrollable.getDOMNode());
 
     this.manageScrollTimeouts();
 
+    var scrollTop = e.target.scrollTop;
+    
     this.setState({ scrollTop: scrollTop });
 
     if (this.shouldTriggerLoad(scrollTop)) {

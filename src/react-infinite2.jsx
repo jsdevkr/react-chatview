@@ -79,8 +79,6 @@ var Infinite = React.createClass({
   },
 
   onScroll (e) {
-    // Order of effects here is unchanged from react-infinite, don't yet understand them
-
     var scrollTop = e.target.scrollTop;
     if (e.target !== this.refs.scrollable.getDOMNode()) { return; } // can this be an assert
     this.props.handleScroll(this.refs.scrollable.getDOMNode()); // react-infinite exposed this prop, but what value does it have?

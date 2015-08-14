@@ -126,7 +126,8 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
    */
   var backSpace;
   if (allHeightsMeasured) {
-    backSpace = perfectChildrenHeight - measuredDistances[visibleEnd-1];
+    var actualVisibleEnd = Math.min(visibleEnd, numItemsMeasured);
+    backSpace = perfectChildrenHeight - measuredDistances[actualVisibleEnd-1];
   }
   else if (anyHeightsMeasured) {
     // Don't have all the heights, so we know there is more we haven't seen/measured,

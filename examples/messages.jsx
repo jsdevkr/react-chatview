@@ -14,7 +14,7 @@ function buildMessages (N) {
 var Messages = React.createClass({
     getInitialState: function() {
         return {
-            messages: buildMessages(50),
+            messages: buildMessages(25),
             isInfiniteLoading: false
         };
     },
@@ -24,7 +24,7 @@ var Messages = React.createClass({
         setTimeout(function() {
             this.setState({
                 isInfiniteLoading: false,
-                messages: this.state.messages.concat(buildMessages(50))
+                messages: this.state.messages.concat(buildMessages(25))
             });
         }.bind(this), 2500);
     },
@@ -40,7 +40,7 @@ var Messages = React.createClass({
         // must pre-compute height of all elements
         return (
             <div className="Messages">
-                <Infinite
+                <Infinite ref="infinite"
                     maxChildren={15}
                     containerHeight={400}
                     // reverse={true}

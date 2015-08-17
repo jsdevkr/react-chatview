@@ -4,25 +4,49 @@ var _last = require('lodash.last');
 var bs = require('./utils/binary_index_search');
 
 /**
- * Three cases to consider for forwards mode.
+ * Three cases to consider.
  *    no items measured (first render)
  *    some items measured (subsequent renders)
  *    all items measured (last few renders before infinite load)
  *
  * aperture: which is the fixed view of visible items. domEl ref "scrollable"
  * apertureHeight: height of the visible items view/window
+ *
+ * scrollableHeight is the .scrollHeight of the scrollable div which conceptually,
+ *   = frontSpacer + displayablesHeight + backSpacer [+ loadSpinner]
+ *   ~ perfectChildrenHeight [+ loadSpinner]
+ *   ~ measuredChildrenHeight [+ loadSpinner]
+ *
+ * It has nothing to do with the apertureHeight. If all heights aren't known, we can't know the
+ * perfectMeasuredScrollableHeight. Determined by browser layout. Reverse mode depends on this value,
+ * so in reverse mode, we always render in forward mode once, measure, then immediately re-render.
  **/
-
-function computeViewState (apertureHeight, measuredDistances, scrollTop, prevMeasuredScrollableHeight, numChildren, maxChildrenPerScreen) {
+function computeViewState (apertureHeight, measuredDistances, scrollTop, prevMeasuredScrollableHeight,
+                           numChildren, maxChildrenPerScreen, flipped) {
 
   /**
    * apertureTop is pixel distance from top of scrollable to first visible node.
    * sum the heights until heights >= apertureTop, number of heights is visibleStart.
    */
-  var apertureTop = scrollTop; //var apertureTop = Math.max(0, scrollTop - apertureHeight);
+  var apertureTop = scrollTop;
   var apertureBottom = scrollTop + apertureHeight;
-  var visibleStart_DistanceFromFront = apertureTop;
-  var visibleEnd_DistanceFromFront = apertureBottom;
+
+  // First render - use forwards mode range, because we can't compute the flipped range
+  // without knowing the scrollableHeight which is measured from the DOM after first render.
+  // It's okay - we can't set the scrollbar pos to the end until after first render also.
+  var visibleStart_DistanceFromFront;
+  var visibleEnd_DistanceFromFront;
+  var firstRender = prevMeasuredScrollableHeight === undefined;
+  if (!flipped || firstRender) {
+    visibleStart_DistanceFromFront = apertureTop;
+    visibleEnd_DistanceFromFront = apertureBottom;
+  }
+  else {
+    visibleStart_DistanceFromFront = prevMeasuredScrollableHeight - apertureBottom;
+    visibleEnd_DistanceFromFront = prevMeasuredScrollableHeight - apertureTop;
+  }
+
+
   var visibleStart = _takeWhile(measuredDistances, (d) => { return d < visibleStart_DistanceFromFront; }).length;
 
 
@@ -36,20 +60,6 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, prevMea
    */
   var perfectChildrenHeight = allHeightsMeasured ? _last(measuredDistances) : undefined;
   var measuredChildrenHeight = anyHeightsMeasured ? _last(measuredDistances) : undefined;
-
-
-  /**
-   * scrollableHeight is the .scrollHeight of the scrollable div which conceptually,
-   *   = frontSpacer + displayablesHeight + backSpacer [+ loadSpinner]
-   *   ~ perfectChildrenHeight [+ loadSpinner]
-   *   ~ measuredChildrenHeight [+ loadSpinner]
-   *
-   * It has nothing to do with the apertureHeight.
-   *
-   * If all heights aren't known, we can't know the perfectMeasuredScrollableHeight.
-   * Determined by browser layout - we can't ever depend on this. (is this correct???)
-   */
-  var scrollableHeight = undefined;
 
 
   /**

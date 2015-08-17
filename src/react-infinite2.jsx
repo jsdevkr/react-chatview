@@ -1,8 +1,8 @@
 var React = global.React || require('react');
 var _clone = require('lodash.clone');
 var spliceArraySegmentAt = require('./utils/splice_array_segment_at');
-var reductions = require('./utils/reductions');var ViewState = require('./ViewState');
-var ViewStateFlipped = require('./ViewStateFlipped');
+var reductions = require('./utils/reductions');
+var ViewState = require('./ViewState');
 
 var Infinite = React.createClass({
 
@@ -43,29 +43,21 @@ var Infinite = React.createClass({
     };
   },
 
-  componentWillMount () {
-    // always use the forward computer for the first pass. That way we always have a scrollHeight
-    // for the reverse computer.
-    // This is hacky but it works. I don't understand reverse mode well enough to do better yet.
-    this.computer = ViewState.computeViewState;
-  },
-
   componentWillUpdate (nextProps, nextState) {
-    this.computer = !this.props.reverse
-        ? ViewState.computeViewState
-        : ViewStateFlipped.computeViewStateFlipped;
+    // For flipped mode - need to know the scrollableHeight to compute the visible range.
     this.prevMeasuredScrollableHeight = this.refs.scrollable.getDOMNode().scrollHeight;
   },
 
   render () {
-    this.prevViewState = this.viewState;
-    var viewState = this.computer( // move to willUpdate?
+    this.prevViewState = this.viewState; // maybe helpful for diagnostics
+    var viewState = ViewState.computeViewState( // move to willUpdate?
         this.props.containerHeight,
         this.measuredDistances,
         this.state.scrollTop,
         this.prevMeasuredScrollableHeight,
         React.Children.count(this.props.children),
-        this.props.maxChildren);
+        this.props.maxChildren,
+        this.props.reverse);
     this.viewState = viewState; // calculated viewState is needed in events and lifecycle methods.
 
     var flipped = this.props.reverse;

@@ -22,7 +22,7 @@ var Infinite = React.createClass({
 
   getDefaultProps () {
     return {
-      flipped: false,
+      flipped: true,
       loadingSpinnerDelegate: <div/>,
       handleScroll: () => {},
       timeScrollStateLastsForAfterUserScrolls: 150,
@@ -41,11 +41,6 @@ var Infinite = React.createClass({
       scrollTimeout: undefined,
       isScrolling: false
     };
-  },
-
-  componentWillUpdate (nextProps, nextState) {
-    // For flipped mode - need to know the scrollableHeight to compute the visible range.
-    this.prevMeasuredScrollableHeight = this.refs.scrollable.getDOMNode().scrollHeight;
   },
 
   render () {
@@ -168,6 +163,9 @@ var Infinite = React.createClass({
     this.measuredHeights = measureChildHeights(domItems);
     this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
 
+    // For flipped mode - need to know the scrollableHeight to compute the visible range.
+    this.prevMeasuredScrollableHeight = this.refs.scrollable.getDOMNode().scrollHeight;
+
     if (this.props.flipped) {
       // Set scrollbar position to all the way at bottom.
       var scrollableDomEl = this.refs.scrollable.getDOMNode();
@@ -193,6 +191,8 @@ var Infinite = React.createClass({
     // in-place replacement of accumulated heights at this range with new measurements
     spliceArraySegmentAt(this.measuredHeights, this.viewState.visibleStart, updatedHeights);
     this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
+
+    this.prevMeasuredScrollableHeight = this.refs.scrollable.getDOMNode().scrollHeight;
 
     this.writeDiagnostics();
   },

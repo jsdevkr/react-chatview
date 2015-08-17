@@ -11,6 +11,7 @@ var bs = require('./utils/binary_index_search');
  *
  * aperture: which is the fixed view of visible items. domEl ref "scrollable"
  * apertureHeight: height of the visible items view/window
+ * apertureTop is pixel distance from top of scrollable to first visible node.
  *
  * scrollableHeight is the .scrollHeight of the scrollable div which conceptually,
  *   = frontSpacer + displayablesHeight + backSpacer [+ loadSpinner]
@@ -21,32 +22,25 @@ var bs = require('./utils/binary_index_search');
  * perfectMeasuredScrollableHeight. Determined by browser layout. Reverse mode depends on this value,
  * so in reverse mode, we always render in forward mode once, measure, then immediately re-render.
  **/
-function computeViewState (apertureHeight, measuredDistances, scrollTop, prevMeasuredScrollableHeight,
+function computeViewState (apertureTop, apertureHeight, measuredDistances, prevMeasuredScrollableHeight,
                            numChildren, maxChildrenPerScreen, flipped) {
 
-  /**
-   * apertureTop is pixel distance from top of scrollable to first visible node.
-   * sum the heights until heights >= apertureTop, number of heights is visibleStart.
-   */
-  var apertureTop = scrollTop;
-  var apertureBottom = scrollTop + apertureHeight;
+  var apertureBottom = apertureTop + apertureHeight;
 
-  // First render - use forwards mode range, because we can't compute the flipped range
-  // without knowing the scrollableHeight which is measured from the DOM after first render.
-  // It's okay - we can't set the scrollbar pos to the end until after first render also.
+
   var visibleStart_DistanceFromFront;
   var visibleEnd_DistanceFromFront;
-  var firstRender = prevMeasuredScrollableHeight === undefined;
-  if (!flipped || firstRender) {
+  if (!flipped) {
     visibleStart_DistanceFromFront = apertureTop;
     visibleEnd_DistanceFromFront = apertureBottom;
   }
   else {
+    console.assert(_isFinite(prevMeasuredScrollableHeight), 'must render in forwards mode the first frame, to measure scrollableHeight');
     visibleStart_DistanceFromFront = prevMeasuredScrollableHeight - apertureBottom;
     visibleEnd_DistanceFromFront = prevMeasuredScrollableHeight - apertureTop;
   }
 
-
+  // sum the heights until heights >= apertureTop, number of heights is visibleStart.
   var visibleStart = _takeWhile(measuredDistances, (d) => { return d < visibleStart_DistanceFromFront; }).length;
 
 

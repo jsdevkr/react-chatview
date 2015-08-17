@@ -22,7 +22,7 @@ var Infinite = React.createClass({
 
   getDefaultProps () {
     return {
-      flipped: true,
+      flipped: false,
       loadingSpinnerDelegate: <div/>,
       handleScroll: () => {},
       timeScrollStateLastsForAfterUserScrolls: 150,
@@ -49,22 +49,26 @@ var Infinite = React.createClass({
   },
 
   render () {
-    this.prevViewState = this.viewState; // maybe helpful for diagnostics
-    var viewState = ViewState.computeViewState( // move to willUpdate?
-        this.props.containerHeight,
-        this.measuredDistances,
-        this.state.scrollTop,
-        this.prevMeasuredScrollableHeight,
-        React.Children.count(this.props.children),
-        this.props.maxChildren,
-        this.props.flipped);
-    this.viewState = viewState; // calculated viewState is needed in events and lifecycle methods.
 
+    // Flipped mode is weird on first render, because it depends on knowing the scrollableHeight.
+    // If we don't have it, we have to render regularly for just one frame, to measure it.
+    // It's okay - we can't set the scrollbar pos to the bottom until after first render also.
     var flipped = this.props.flipped;
     var isFirstRender = this.prevMeasuredScrollableHeight === undefined;
     if (flipped && isFirstRender) {
       flipped = false;
     }
+
+    this.prevViewState = this.viewState; // maybe helpful for diagnostics
+    var viewState = ViewState.computeViewState( // move to willUpdate?
+        this.state.scrollTop,
+        this.props.containerHeight,
+        this.measuredDistances,
+        this.prevMeasuredScrollableHeight,
+        React.Children.count(this.props.children),
+        this.props.maxChildren,
+        flipped);
+    this.viewState = viewState; // calculated viewState is needed in events and lifecycle methods.
 
     var displayables = this.props.children.slice(viewState.visibleStart, viewState.visibleEnd);
     if (flipped) {

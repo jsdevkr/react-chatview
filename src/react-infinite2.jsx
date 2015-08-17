@@ -61,7 +61,7 @@ var Infinite = React.createClass({
 
     this.prevViewState = this.viewState; // maybe helpful for diagnostics
     var viewState = ViewState.computeViewState( // move to willUpdate?
-        this.state.scrollTop,
+        this.state.scrollTop, // scrollTop is always the height of aperatureTop, measured from the scrollable bottom.
         this.props.containerHeight,
         this.measuredDistances,
         this.prevMeasuredScrollableHeight,

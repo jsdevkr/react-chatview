@@ -1,7 +1,9 @@
 var React = global.React || require('react');
 var _clone = require('lodash.clone');
 var ViewState = require('./ViewState');
-
+var ViewStateFlipped = require('./ViewStateFlipped');
+var spliceArraySegmentAt = require('./utils/splice_array_segment_at');
+var reductions = require('./utils/reductions')
 
 var Infinite = React.createClass({
 
@@ -182,31 +184,6 @@ var Infinite = React.createClass({
   }
 });
 
-
-
-function reductions (coll, iteratee, seed) {
-  var steps = [];
-
-  var innerIteratee = (acc, val, i) => {
-    steps.push(acc);
-    return iteratee(acc, val, i);
-  };
-
-  var sum = seed === undefined
-      ? coll.reduce(innerIteratee) // undefined seed would be used as the accumulator
-      : coll.reduce(innerIteratee, seed);
-
-  steps.push(sum);
-  return steps;
-}
-
-
-function spliceArraySegmentAt(arrayRef, start, newArray) {
-  var splice_args = [start, newArray.length].concat(newArray);
-  var MAX_NUM_FN_ARGS = 32766;
-  console.assert(splice_args.length < MAX_NUM_FN_ARGS, 'http://stackoverflow.com/questions/22747068/');
-  Array.prototype.splice.apply(arrayRef, splice_args);
-}
 
 
 function measureChildHeights (domItems) {

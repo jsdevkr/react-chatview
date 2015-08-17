@@ -157,8 +157,8 @@ var Infinite = React.createClass({
   },
 
   componentDidUpdate (prevProps, prevState) {
-    console.assert(this.viewState.measuredChildrenHeight >= this.prevViewState.measuredChildrenHeight
-        || this.prevViewState.measuredChildrenHeight === undefined);
+    //console.assert(this.viewState.measuredChildrenHeight >= this.prevViewState.measuredChildrenHeight
+    //    || this.prevViewState.measuredChildrenHeight === undefined);
 
     // Measure item node heights again because they may have changed.
     var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item');

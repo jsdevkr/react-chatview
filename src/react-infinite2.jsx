@@ -164,13 +164,11 @@ var Infinite = React.createClass({
   },
 
   componentDidMount () {
-    var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item');
-
     // Measure the heights of the item DOM nodes as rendered and laid out.
     // We have not measured their heights yet.
-
     // Do not store this in React state, because the view doesn't depend on them
     // and we don't want to cause a re-render.
+    var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item');
     this.measuredHeights = measureChildHeights(domItems);
     this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
 

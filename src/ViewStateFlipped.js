@@ -17,18 +17,10 @@ function computeViewStateFlipped (apertureHeight, measuredDistances, scrollTop, 
     // The top is visibleStartHeight. That's they key to computing the forwards mode results.
     // It's just free - scrollTop - in forwards mode. It's not free in backwards mode.
     // But once we have it, we can reuse the forwards mode results?
-    var apertureBottom = scrollTop;
-    var apertureTop = apertureBottom - apertureHeight;
+    var apertureTop = scrollTop;
+    var apertureBottom = scrollTop + apertureHeight;
     var visibleStart_DistanceFromFront = prevMeasuredScrollableHeight - apertureBottom;
     var visibleEnd_DistanceFromFront = prevMeasuredScrollableHeight - apertureTop;
-
-    //return ViewState.computeViewState(
-    //    apertureHeight,
-    //    measuredDistances,
-    //    visibleStartHeight,
-    //    undefined,
-    //    numChildren,
-    //    maxChildrenPerScreen);
 
     var visibleStart = _takeWhile(measuredDistances, (d) => { return d < visibleStart_DistanceFromFront; }).length;
 

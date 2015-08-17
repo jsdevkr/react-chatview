@@ -101,6 +101,10 @@ var Infinite = React.createClass({
   },
 
   onScroll (e) {
+    if (this.silenceNextOnScroll) {
+      this.silenceNextOnScroll = false;
+      return;
+    }
     console.assert(e.target === this.refs.scrollable.getDOMNode());
 
     this.manageScrollTimeouts();
@@ -176,9 +180,11 @@ var Infinite = React.createClass({
 
     if (this.props.reverse) {
       var scrollableDomEl = this.refs.scrollable.getDOMNode();
-      var newScrollTop = scrollableDomEl.scrollHeight; // all the way at bottom
+      this.silenceNextOnScroll = true; // mega hack - bug in react???
+      var newScrollTop = scrollableDomEl.scrollHeight - this.props.containerHeight; // all the way at bottom
+      // not scrollBottom which isn't a thing !!
       scrollableDomEl.scrollTop = newScrollTop; // this fires onScroll, which will set the state.
-      //this.setState({ scrollTop: newScrollTop });
+      this.setState({ scrollTop: newScrollTop });
     }
 
     this.writeDiagnostics();

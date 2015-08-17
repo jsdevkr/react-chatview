@@ -113,8 +113,7 @@ var Infinite = React.createClass({
     if (!viewState.allHeightsMeasured) {
       return false; // If we haven't seen all the nodes, we aren't ready to trigger a load. -- this is wrongish
     }
-
-    //var totalScrollableHeight = this.measuredDistances[this.measuredDistances.length-1];
+    
     var whatIsThisNumber =
         viewState.measuredChildrenHeight -
         viewState.apertureHeight -

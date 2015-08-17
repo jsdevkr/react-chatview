@@ -1,9 +1,8 @@
 var React = global.React || require('react');
 var _clone = require('lodash.clone');
-var ViewState = require('./ViewState');
-var ViewStateFlipped = require('./ViewStateFlipped');
 var spliceArraySegmentAt = require('./utils/splice_array_segment_at');
-var reductions = require('./utils/reductions')
+var reductions = require('./utils/reductions');var ViewState = require('./ViewState');
+var ViewStateFlipped = require('./ViewStateFlipped');
 
 var Infinite = React.createClass({
 
@@ -23,7 +22,7 @@ var Infinite = React.createClass({
 
   getDefaultProps () {
     return {
-      reverse: false,
+      reverse: true,
       loadingSpinnerDelegate: <div/>,
       handleScroll: () => {},
       timeScrollStateLastsForAfterUserScrolls: 150,
@@ -44,20 +43,41 @@ var Infinite = React.createClass({
     };
   },
 
+  componentWillMount () {
+    // always use the forward computer for the first pass. That way we always have a scrollHeight
+    // for the reverse computer.
+    // This is hacky but it works. I don't understand reverse mode well enough to do better yet.
+    this.computer = ViewState.computeViewState;
+  },
+
+  componentWillUpdate (nextProps, nextState) {
+    this.computer = !this.props.reverse
+        ? ViewState.computeViewState
+        : ViewStateFlipped.computeViewStateFlipped;
+    this.prevMeasuredScrollableHeight = this.refs.scrollable.getDOMNode().scrollHeight;
+  },
 
   render () {
-
     this.prevViewState = this.viewState;
-    var viewState = ViewState.computeViewState( // move to willUpdate?
+    var viewState = this.computer( // move to willUpdate?
         this.props.containerHeight,
         this.measuredDistances,
         this.state.scrollTop,
+        this.prevMeasuredScrollableHeight,
         React.Children.count(this.props.children),
         this.props.maxChildren);
     this.viewState = viewState; // calculated viewState is needed in events and lifecycle methods.
 
-    var children = this.props.reverse ? _clone(this.props.children).reverse() : this.props.children;
-    var displayables = children.slice(viewState.visibleStart, viewState.visibleEnd);
+    var flipped = this.props.reverse;
+    var isFirstRenderInFlippedMode = this.props.reverse && this.prevMeasuredScrollableHeight === undefined;
+    if (isFirstRenderInFlippedMode) {
+      flipped = false;
+    }
+    //var children = this.flipped ? _clone(this.props.children) : this.props.children;
+    var displayables = this.props.children.slice(viewState.visibleStart, viewState.visibleEnd);
+    if (flipped) {
+      displayables.reverse();
+    }
 
     var loadSpinner = <div ref="loadingSpinner">
       {this.state.isInfiniteLoading ? this.props.loadingSpinnerDelegate : null}
@@ -96,6 +116,7 @@ var Infinite = React.createClass({
   },
 
   shouldTriggerLoad (scrollTop) {
+    return false;
     var viewState = this.viewState;
 
     if (!viewState.allHeightsMeasured) {
@@ -152,6 +173,13 @@ var Infinite = React.createClass({
     // and we don't want to cause a re-render.
     this.measuredHeights = measureChildHeights(domItems);
     this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
+
+    if (this.props.reverse) {
+      var scrollableDomEl = this.refs.scrollable.getDOMNode();
+      var newScrollTop = scrollableDomEl.scrollHeight; // all the way at bottom
+      scrollableDomEl.scrollTop = newScrollTop; // this fires onScroll, which will set the state.
+      //this.setState({ scrollTop: newScrollTop });
+    }
 
     this.writeDiagnostics();
   },

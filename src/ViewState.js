@@ -13,14 +13,17 @@ var bs = require('./utils/binary_index_search');
  * apertureHeight: height of the visible items view/window
  **/
 
-function computeViewState (apertureHeight, measuredDistances, scrollTop, numChildren, maxChildrenPerScreen) {
+function computeViewState (apertureHeight, measuredDistances, scrollTop, prevMeasuredScrollableHeight, numChildren, maxChildrenPerScreen) {
 
   /**
    * apertureTop is pixel distance from top of scrollable to first visible node.
    * sum the heights until heights >= apertureTop, number of heights is visibleStart.
    */
   var apertureTop = scrollTop; //var apertureTop = Math.max(0, scrollTop - apertureHeight);
-  var visibleStart = _takeWhile(measuredDistances, (d) => { return d < apertureTop; }).length;
+  var apertureBottom = scrollTop + apertureHeight;
+  var visibleStart_DistanceFromFront = apertureTop;
+  var visibleEnd_DistanceFromFront = apertureBottom;
+  var visibleStart = _takeWhile(measuredDistances, (d) => { return d < visibleStart_DistanceFromFront; }).length;
 
 
   var numItemsMeasured = measuredDistances.length;
@@ -56,12 +59,9 @@ function computeViewState (apertureHeight, measuredDistances, scrollTop, numChil
    * Do we need a bottom spacer in this case? Yeah, if we've seen more heights that where we
    * are but not all the heights, so the scroll area doesn't grow then shrink.
    */
-
-  //var apertureBottom = Math.min(totalScrollableHeightSeen, scrollTop + viewHeight); // wut
-  var apertureBottom = scrollTop + apertureHeight;
   var visibleEnd; // not inclusive.. Math range notation: [visibleStart, visibleEnd)
   if (allHeightsMeasured) {
-    var foundIndex = bs.binaryIndexSearch(measuredDistances, apertureBottom, bs.opts.CLOSEST_HIGHER);
+    var foundIndex = bs.binaryIndexSearch(measuredDistances, visibleEnd_DistanceFromFront, bs.opts.CLOSEST_HIGHER);
     var found = typeof foundIndex !== 'undefined';
     visibleEnd = found
         ? foundIndex + 1 // don't understand why we are off by one here.

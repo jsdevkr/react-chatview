@@ -10,7 +10,7 @@ var Infinite = React.createClass({
 
     maxChildren: React.PropTypes.number.isRequired, // max # visible items (e.g. # of blank items that fit)
     containerHeight: React.PropTypes.number.isRequired, // total height of the visible window.
-    reverse: React.PropTypes.bool,
+    flipped: React.PropTypes.bool,
     handleScroll: React.PropTypes.func, // What is this for? Not used in examples.
     timeScrollStateLastsForAfterUserScrolls: React.PropTypes.number,
     infiniteLoadBeginBottomOffset: React.PropTypes.number,
@@ -22,7 +22,7 @@ var Infinite = React.createClass({
 
   getDefaultProps () {
     return {
-      reverse: true,
+      flipped: true,
       loadingSpinnerDelegate: <div/>,
       handleScroll: () => {},
       timeScrollStateLastsForAfterUserScrolls: 150,
@@ -57,15 +57,15 @@ var Infinite = React.createClass({
         this.prevMeasuredScrollableHeight,
         React.Children.count(this.props.children),
         this.props.maxChildren,
-        this.props.reverse);
+        this.props.flipped);
     this.viewState = viewState; // calculated viewState is needed in events and lifecycle methods.
 
-    var flipped = this.props.reverse;
-    var isFirstRenderInFlippedMode = this.props.reverse && this.prevMeasuredScrollableHeight === undefined;
-    if (isFirstRenderInFlippedMode) {
+    var flipped = this.props.flipped;
+    var isFirstRender = this.prevMeasuredScrollableHeight === undefined;
+    if (flipped && isFirstRender) {
       flipped = false;
     }
-    //var children = this.flipped ? _clone(this.props.children) : this.props.children;
+
     var displayables = this.props.children.slice(viewState.visibleStart, viewState.visibleEnd);
     if (flipped) {
       displayables.reverse();
@@ -75,18 +75,18 @@ var Infinite = React.createClass({
       {this.state.isInfiniteLoading ? this.props.loadingSpinnerDelegate : null}
     </div>;
 
-    var topSpace = !this.props.reverse ? viewState.frontSpace : viewState.backSpace;
-    var bottomSpace = !this.props.reverse ? viewState.backSpace : viewState.frontSpace;
+    var topSpace = !flipped ? viewState.frontSpace : viewState.backSpace;
+    var bottomSpace = !flipped ? viewState.backSpace : viewState.frontSpace;
 
     return (
       <div className={this.props.className} ref="scrollable" onScroll={this.onScroll}
            style={buildScrollableStyle(viewState.apertureHeight)}>
         <div ref="smoothScrollingWrapper" style={this.state.isScrolling ? { pointerEvents: 'none' } : {}}>
-          {this.props.reverse ? loadSpinner : null}
+          {flipped ? loadSpinner : null}
           <div ref="topSpacer" style={buildHeightStyle(topSpace)}/>
           {displayables}
           <div ref="bottomSpacer" style={buildHeightStyle(bottomSpace)}/>
-          {this.props.reverse ? null : loadSpinner}
+          {flipped ? null : loadSpinner}
         </div>
       </div>
     );
@@ -164,7 +164,7 @@ var Infinite = React.createClass({
     this.measuredHeights = measureChildHeights(domItems);
     this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
 
-    if (this.props.reverse) {
+    if (this.props.flipped) {
       // Set scrollbar position to all the way at bottom.
       var scrollableDomEl = this.refs.scrollable.getDOMNode();
 

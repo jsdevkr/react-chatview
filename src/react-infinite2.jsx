@@ -107,18 +107,22 @@ var Infinite = React.createClass({
   },
 
   shouldTriggerLoad (scrollTop) {
-    return false;
     var viewState = this.viewState;
 
     if (!viewState.allHeightsMeasured) {
       return false; // If we haven't seen all the nodes, we aren't ready to trigger a load. -- this is wrongish
     }
-    
+
+    var new_apertureTop = scrollTop;
+    var new_visibleEnd_DistanceFromFront = !this.props.flipped
+        ? new_apertureTop
+        : viewState.prevMeasuredScrollableHeight - new_apertureTop;
+
     var whatIsThisNumber =
         viewState.measuredChildrenHeight -
         viewState.apertureHeight -
         this.props.infiniteLoadBeginBottomOffset;
-    var triggerLoad = (scrollTop > whatIsThisNumber);
+    var triggerLoad = (new_visibleEnd_DistanceFromFront > whatIsThisNumber);
 
     return triggerLoad && !this.state.isInfiniteLoading;
   },
@@ -192,6 +196,11 @@ var Infinite = React.createClass({
     this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
 
     this.prevMeasuredScrollableHeight = this.refs.scrollable.getDOMNode().scrollHeight;
+
+    var loadedMoreChildren = this.viewState.numChildren !== this.prevViewState.numChildren;
+    if (loadedMoreChildren && this.props.flipped) {
+      
+    }
 
     this.writeDiagnostics();
   },

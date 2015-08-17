@@ -101,10 +101,6 @@ var Infinite = React.createClass({
   },
 
   onScroll (e) {
-    if (this.silenceNextOnScroll) {
-      this.silenceNextOnScroll = false;
-      return;
-    }
     console.assert(e.target === this.refs.scrollable.getDOMNode());
 
     this.manageScrollTimeouts();
@@ -179,12 +175,14 @@ var Infinite = React.createClass({
     this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
 
     if (this.props.reverse) {
+      // Set scrollbar position to all the way at bottom.
       var scrollableDomEl = this.refs.scrollable.getDOMNode();
-      this.silenceNextOnScroll = true; // mega hack - bug in react???
-      var newScrollTop = scrollableDomEl.scrollHeight - this.props.containerHeight; // all the way at bottom
-      // not scrollBottom which isn't a thing !!
-      scrollableDomEl.scrollTop = newScrollTop; // this fires onScroll, which will set the state.
-      this.setState({ scrollTop: newScrollTop });
+
+      // API is scrollTop, not scrollBottom, so account for apertureHeight
+      var newScrollTop = scrollableDomEl.scrollHeight - this.props.containerHeight;
+
+      // this fires onScroll event, which will set the state.
+      scrollableDomEl.scrollTop = newScrollTop;
     }
 
     this.writeDiagnostics();

@@ -182,6 +182,9 @@ function computeViewState (apertureTop, apertureHeight, measuredDistances, prevM
     visibleEnd: visibleEnd,
     visibleStartHeight: visibleStartHeight,
     visibleEndHeight: visibleEndHeight,
+    visibleStart_DistanceFromFront: visibleStart_DistanceFromFront,
+    visibleEnd_DistanceFromFront: visibleEnd_DistanceFromFront,
+
     frontSpace: frontSpace,
     backSpace: backSpace,
 
@@ -198,7 +201,8 @@ function computeViewState (apertureTop, apertureHeight, measuredDistances, prevM
 
     //scrollableHeight: scrollableHeight,   -- is this needed?
     perfectScrollableHeight: perfectScrollableHeight,
-    measuredScrollableHeight: measuredScrollableHeight,
+    measuredScrollableHeight: measuredScrollableHeight, // actually isn't a measurement, it's computed
+    prevMeasuredScrollableHeight: prevMeasuredScrollableHeight, // really measured from dom
 
     numChildren: numChildren,
     maxChildrenPerScreen: maxChildrenPerScreen

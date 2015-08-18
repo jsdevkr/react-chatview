@@ -33,13 +33,17 @@ var Infinite = React.createClass({
   getInitialState () {
     this.measuredHeights = []; // actual heights of items measured from dom as we see them
     this.measuredDistances = []; // computed pixel distance of each item from the window top
+    this.prevMeasuredScrollableHeight = null;
+    this.viewState = null;
+    this.prevViewState = null;
     // Stored out-of-band of react state because the view doesn't depend on this, only scroll handlers,
     // we don't want to trigger component updates when we compute it.
 
     return {
       scrollTop: 0,
       scrollTimeout: null,
-      isScrolling: false
+      isScrolling: false,
+      isInfiniteLoading: false
     };
   },
 
@@ -49,7 +53,7 @@ var Infinite = React.createClass({
     // If we don't have it, we have to render regularly for just one frame, to measure it.
     // It's okay - we can't set the scrollbar pos to the bottom until after first render also.
     var flipped = this.props.flipped;
-    var isFirstRender = this.prevMeasuredScrollableHeight === undefined;
+    var isFirstRender = this.prevMeasuredScrollableHeight === null;
     if (flipped && isFirstRender) {
       flipped = false;
     }

@@ -52,8 +52,8 @@ function computeViewState (apertureTop, apertureHeight, measuredDistances, prevM
    * perfectChildrenHeight and displayablesHeight is not knowable until we measure it after render,
    * as depends on browser layout.
    */
-  var perfectChildrenHeight = allHeightsMeasured ? _last(measuredDistances) : undefined;
-  var measuredChildrenHeight = anyHeightsMeasured ? _last(measuredDistances) : undefined;
+  var perfectChildrenHeight = allHeightsMeasured ? _last(measuredDistances) : null;
+  var measuredChildrenHeight = anyHeightsMeasured ? _last(measuredDistances) : null;
 
 
   /**
@@ -89,12 +89,14 @@ function computeViewState (apertureTop, apertureHeight, measuredDistances, prevM
    */
 
   // may be past the end of measuredHeights if we haven't yet measured these now-visible items.
-  // Don't want this value undefined if anyHeightsMeasured, because backSpace depends on it.
+  // Don't want this value null if anyHeightsMeasured, because backSpace depends on it.
   // Fallback to prior render's value. BackSpacer is an approximation anyway.
   //console.assert(visibleEnd >= numItemsMeasured);
   var numNewlyVisibleItems = Math.max(0, visibleEnd - numItemsMeasured);
   //console.assert(numNewlyVisibleItems >= 0);
-  var visibleEndHeight = measuredDistances[visibleEnd-numNewlyVisibleItems-1];
+  var visibleEndHeight = anyHeightsMeasured
+      ? measuredDistances[visibleEnd-numNewlyVisibleItems-1]
+      : null;
   var visibleStartHeight = (visibleStart-numNewlyVisibleItems > 0 // why is this case special?
       ? measuredDistances[visibleStart-numNewlyVisibleItems-1]
       : 0);
@@ -104,7 +106,7 @@ function computeViewState (apertureTop, apertureHeight, measuredDistances, prevM
     displayablesHeight = visibleEndHeight - visibleStartHeight;
   }
   else {
-    displayablesHeight = undefined;
+    displayablesHeight = null;
   }
 
   /**
@@ -163,16 +165,16 @@ function computeViewState (apertureTop, apertureHeight, measuredDistances, prevM
   // Some sanity checks and documentation of assumptions.
   console.assert(apertureBottom - apertureTop === apertureHeight);
   console.assert(_isFinite(visibleStartHeight) && visibleStartHeight >= 0);
-  console.assert(visibleEndHeight === undefined || (_isFinite(visibleEndHeight) && visibleEndHeight >= 0));
+  console.assert(visibleEndHeight === null || (_isFinite(visibleEndHeight) && visibleEndHeight >= 0));
   console.assert(_isFinite(frontSpace) && frontSpace >= 0);
   console.assert(_isFinite(backSpace) && backSpace >= 0);
   console.assert(_isFinite(visibleStart) && visibleStart >= 0 && visibleStart <= numChildren);
   console.assert(_isFinite(visibleEnd) && visibleEnd >= 0 /*&& visibleEnd <= numChildren*/);
   console.assert(_isFinite(apertureHeight));
   console.assert(_isFinite(apertureBottom));
-  console.assert(_isFinite(perfectChildrenHeight) || perfectChildrenHeight === undefined);
-  console.assert(_isFinite(displayablesHeight) || displayablesHeight === undefined);
-  console.assert(_isFinite(measuredChildrenHeight) || measuredChildrenHeight === undefined);
+  console.assert(_isFinite(perfectChildrenHeight) || perfectChildrenHeight === null);
+  console.assert(_isFinite(displayablesHeight) || displayablesHeight === null);
+  console.assert(_isFinite(measuredChildrenHeight) || measuredChildrenHeight === null);
 
 
 

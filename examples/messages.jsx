@@ -1,4 +1,9 @@
 
+function shortUid() {
+    // http://stackoverflow.com/a/6248722/20003
+    return ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).slice(-4)
+}
+
 function buildMessages (N) {
     var ms = [];
     for (var i = 0; i < N; ++i) {
@@ -29,6 +34,10 @@ var MessagesDemo = React.createClass({
         }.bind(this), 2500);
     },
 
+    componentWillMount: function () {
+        this.diagnosticsUuid = shortUid();
+    },
+
     render: function() {
         var elements = this.state.messages.map(function (record, i) {
             var style = { height: undefined };
@@ -50,12 +59,13 @@ var MessagesDemo = React.createClass({
                         loadingSpinnerDelegate={loadSpinner}
                         isInfiniteLoading={this.state.isInfiniteLoading}
                         timeScrollStateLastsForAfterUserScrolls={1000}
-                        diagnosticsDomElId="diagnostics">
+                        diagnosticsDomElId={this.diagnosticsUuid}>
                         {elements}
                     </Infinite>
                     <button onClick={this.receiveNewMessage}>Receive New Message</button>
                 </div>
-                <pre className="diagnostics" id="diagnostics"></pre>
+                <pre className="diagnostics" id={this.diagnosticsUuid}></pre>
+                <div style={{clear: 'both'}}/>
             </div>
         );
     },
@@ -67,5 +77,5 @@ var MessagesDemo = React.createClass({
     }
 });
 
-var App = <MessagesDemo />;
+var App = <div><MessagesDemo /><MessagesDemo style={{}}/></div>;
 window.app = React.render(App, document.getElementById('messages-example'));

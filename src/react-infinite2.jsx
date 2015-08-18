@@ -22,7 +22,7 @@ var Infinite = React.createClass({
 
   getDefaultProps () {
     return {
-      flipped: true,
+      flipped: false,
       loadingSpinnerDelegate: <div/>,
       handleScroll: () => {},
       timeScrollStateLastsForAfterUserScrolls: 150,

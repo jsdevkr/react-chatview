@@ -38,7 +38,7 @@ var Infinite = React.createClass({
 
     return {
       scrollTop: 0,
-      scrollTimeout: undefined,
+      scrollTimeout: null,
       isScrolling: false
     };
   },
@@ -139,7 +139,7 @@ var Infinite = React.createClass({
         scrollTimeout = setTimeout(() => {
           that.setState({
             isScrolling: false,
-            scrollTimeout: undefined
+            scrollTimeout: null
           })
         }, this.props.timeScrollStateLastsForAfterUserScrolls);
 

@@ -221,6 +221,9 @@ var Infinite = React.createClass({
 
 
 function measureChildHeights (domItems) {
+  // clientHeight doesn't account for the border.
+  // offsetHeight does, but it double counts some things.
+  // It doesn't really matter - a few pixels isn't a big deal for this component.
   var xs = [];
   for (var i=0; i<domItems.length; ++i) {
     xs.push(domItems[i].clientHeight);

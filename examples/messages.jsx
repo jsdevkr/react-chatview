@@ -11,10 +11,10 @@ function buildMessages (N) {
 
 
 // Backwards, scrolling up lazy loads old messges, and new messages can come in any time.
-var Messages = React.createClass({
+var MessagesDemo = React.createClass({
     getInitialState: function() {
         return {
-            messages: buildMessages(25),
+            messages: buildMessages(50),
             isInfiniteLoading: false
         };
     },
@@ -39,21 +39,23 @@ var Messages = React.createClass({
 
         // must pre-compute height of all elements
         return (
-            <div className="Messages">
-                <Infinite ref="infinite"
-                    maxChildren={15}
-                    containerHeight={400}
-                    // reverse={true}
-                    infiniteLoadBeginBottomOffset={200}
-                    onInfiniteLoad={this.handleInfiniteLoad}
-                    loadingSpinnerDelegate={loadSpinner}
-                    isInfiniteLoading={this.state.isInfiniteLoading}
-                    timeScrollStateLastsForAfterUserScrolls={1000}
-                    diagnosticsDomElId="diagnostics">
-                    {elements}
-                </Infinite>
-                <button onClick={this.receiveNewMessage}>Receive New Message</button>
-                <pre id="diagnostics"></pre>
+            <div className="MessagesDemo">
+                <div className="chat">
+                    <Infinite ref="infinite"
+                        maxChildren={15}
+                        containerHeight={400}
+                        //flipped={true}
+                        infiniteLoadBeginBottomOffset={200}
+                        onInfiniteLoad={this.handleInfiniteLoad}
+                        loadingSpinnerDelegate={loadSpinner}
+                        isInfiniteLoading={this.state.isInfiniteLoading}
+                        timeScrollStateLastsForAfterUserScrolls={1000}
+                        diagnosticsDomElId="diagnostics">
+                        {elements}
+                    </Infinite>
+                    <button onClick={this.receiveNewMessage}>Receive New Message</button>
+                </div>
+                <pre className="diagnostics" id="diagnostics"></pre>
             </div>
         );
     },
@@ -65,5 +67,5 @@ var Messages = React.createClass({
     }
 });
 
-
-window.app = React.render(<Messages />, document.getElementById('messages-example'));
+var App = <MessagesDemo />;
+window.app = React.render(App, document.getElementById('messages-example'));

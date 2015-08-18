@@ -53,7 +53,7 @@ var MessagesDemo = React.createClass({
                     <Infinite ref="infinite"
                         maxChildren={15}
                         containerHeight={400}
-                        //flipped={true}
+                        flipped={this.props.flipped}
                         infiniteLoadBeginBottomOffset={200}
                         onInfiniteLoad={this.handleInfiniteLoad}
                         loadingSpinnerDelegate={loadSpinner}
@@ -77,5 +77,5 @@ var MessagesDemo = React.createClass({
     }
 });
 
-var App = <div><MessagesDemo /><MessagesDemo style={{}}/></div>;
+var App = <div><MessagesDemo /><MessagesDemo flipped={true} /></div>;
 window.app = React.render(App, document.getElementById('messages-example'));

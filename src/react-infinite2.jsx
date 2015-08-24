@@ -212,7 +212,9 @@ var Infinite = React.createClass({
     // and we don't want to cause a re-render.
     var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item:not(.infinite-load-spinner)');
     this.measuredHeights = measureChildHeights(domItems);
-    this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
+    this.measuredDistances = this.measuredHeights.length > 0
+        ? reductions(this.measuredHeights, (acc, val) => { return acc+val; })
+        : [];
 
     if (this.props.flipped) {
       // Set scrollbar position to all the way at bottom.
@@ -242,7 +244,9 @@ var Infinite = React.createClass({
     // in-place replacement of accumulated heights at this range with new measurements
     if (!_isEqual(this.measuredHeights.slice(this.viewState.visibleStart), updatedHeights)) {
       spliceArraySegmentAt(this.measuredHeights, this.viewState.visibleStart, updatedHeights);
-      this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
+      this.measuredDistances = this.measuredHeights.length > 0
+          ? reductions(this.measuredHeights, (acc, val) => { return acc+val; })
+          : [];
     }
 
     // should we track the actual scrollHeight to see how accurate we are?

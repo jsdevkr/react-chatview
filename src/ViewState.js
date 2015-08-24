@@ -51,8 +51,9 @@ function computeViewState (apertureTop, apertureHeight, measuredDistances, prevM
   /**
    * perfectChildrenHeight and displayablesHeight is not knowable until we measure it after render,
    * as depends on browser layout.
+   * If there are zero children, height is zero.
    */
-  var perfectChildrenHeight = allHeightsMeasured ? _last(measuredDistances) : null;
+  var perfectChildrenHeight = allHeightsMeasured ? (_last(measuredDistances) || 0) : null;
   var measuredChildrenHeight = anyHeightsMeasured ? _last(measuredDistances) : null;
 
 
@@ -129,11 +130,13 @@ function computeViewState (apertureTop, apertureHeight, measuredDistances, prevM
    * Exact measurement is only needed as we approach the bottom to prevent over-scrolling.
    * If we don't know any heights, just leave enough downward scroll room for at least
    * one more screenful of results.
+   *
+   * What about the case where we have zero children, or less than once screenful of children?
    */
   var backSpace;
   if (allHeightsMeasured) {
     var actualVisibleEnd = Math.min(visibleEnd, numItemsMeasured);
-    backSpace = perfectChildrenHeight - measuredDistances[actualVisibleEnd-1];
+    backSpace = perfectChildrenHeight - (measuredDistances[actualVisibleEnd-1] || 0);
   }
   else if (anyHeightsMeasured) {
     // Don't have all the heights, so we know there is more we haven't seen/measured,

@@ -76,60 +76,11 @@ var Infinite = React.createClass({
   },
 
   componentWillUpdate (nextProps, nextState) {
-    // viewState is a function of state.scrollTop only - it is not a function of the other
-    // state keys: isScrolling, isInfiniteLoading, scrollTimeout.
-    // Do not recompute viewstate when these other state keys change. This matters a lot because
-    // in flipped mode, the viewState depends on prevViewState.
-
     if (this.state.scrollTop !== nextState.scrollTop) {
-      var nextViewState = ViewState.computeViewState(
-          nextState.scrollTop,
-          this.props.containerHeight,
-          this.measuredDistances,
-          this.viewState.measuredScrollableHeight,
-          React.Children.count(this.props.children),
-          this.props.maxChildren,
-          this.props.flipped);
-
-
-      var isViewStateSettled = this.prevViewState !== null;
-      // These diagnostics only hold true after things settle down in flipped mode.
-      if (isViewStateSettled) {
-        // scrollTop increased = scrolling absolute down
-        var scrollingDown = nextState.scrollTop <= this.state.scrollTop;
-        var scrollingUp = nextState.scrollTop >= this.state.scrollTop;
-
-        var regular = !this.props.flipped;
-        var flipped = this.props.flipped;
-
-        // regular: scrolling absolute down = forwards, up = backwards
-        // flipped: scrolling absolute down = backwards, up = forwards
-
-        var scrollingForwards = xor(regular, scrollingDown);
-        var scrollingBackwards = xor(regular, scrollingUp);
-
-        var scrollingForwards2 = xor(flipped, scrollingUp);
-        var scrollingBackwards2 = xor(flipped, scrollingDown);
-
-        console.assert(scrollingForwards == scrollingForwards2);
-        console.assert(scrollingBackwards == scrollingBackwards2);
-
-        // if scrolling forwards, visibleRange increased or stayed the same.
-        // if scrolling backwards, visibleRange decreased or stayed the same.
-        if (scrollingForwards) {
-          console.assert(nextViewState.visibleStart >= this.viewState.visibleStart);
-          console.assert(nextViewState.visibleEnd >= this.viewState.visibleEnd);
-        }
-
-        if (scrollingBackwards) {
-          console.assert(nextViewState.visibleStart <= this.viewState.visibleStart);
-          console.assert(nextViewState.visibleEnd <= this.viewState.visibleEnd);
-        }
-      }
-
-      // Setup viewStates for render as if they were managed by react lifecycle.
-      this.prevViewState = this.viewState;
-      this.viewState = nextViewState;
+      verifyVisibleRangeMonotonicallyIncreasing(
+          nextProps.flipped, this.state.scrollTop, nextState.scrollTop,
+          this.prevViewState, this.viewState // these two better be lined up right...
+      );
     }
   },
 
@@ -167,6 +118,30 @@ var Infinite = React.createClass({
     this.manageScrollTimeouts();
 
     var scrollTop = e.target.scrollTop;
+    var nextViewState = ViewState.computeViewState(
+        scrollTop,
+        this.props.containerHeight,
+        this.measuredDistances,
+        this.viewState.measuredScrollableHeight,
+        React.Children.count(this.props.children),
+        this.props.maxChildren,
+        this.props.flipped);
+
+    // if flipped and the measuredHeight changed, adjust the scrollTop here. hack
+    var heightDifference = nextViewState.measuredScrollableHeight - nextViewState.prevMeasuredScrollableHeight;
+    if (this.props.flipped && heightDifference !== 0) {
+      scrollTop = scrollTop + heightDifference; // has to happen before viewstate computed.
+      // Compute it again.
+      nextViewState = ViewState.computeViewState(
+          scrollTop,
+          this.props.containerHeight,
+          this.measuredDistances,
+          this.viewState.measuredScrollableHeight,
+          React.Children.count(this.props.children),
+          this.props.maxChildren,
+          this.props.flipped);
+    }
+
     if (this.shouldTriggerLoad(scrollTop)) {
       this.setState({ isInfiniteLoading: true, scrollTop: scrollTop });
       this.props.onInfiniteLoad();
@@ -174,9 +149,13 @@ var Infinite = React.createClass({
     else {
       this.setState({ scrollTop: scrollTop });
     }
+
+    this.prevViewState = this.viewState;
+    this.viewState = nextViewState;
   },
 
   shouldTriggerLoad (scrollTop) {
+    return false;
     var viewState = this.viewState;
 
     if (!viewState.allHeightsMeasured) {
@@ -325,6 +304,42 @@ function buildScrollableStyle(apertureHeight) {
   };
 }
 
+
+function verifyVisibleRangeMonotonicallyIncreasing (flipped, scrollTop, nextScrollTop, viewState, nextViewState) {
+  var isViewStateSettled = viewState !== null;
+  // These diagnostics only hold true after things settle down in flipped mode.
+  if (isViewStateSettled) {
+    // scrollTop increased = scrolling absolute down
+    var scrollingDown = nextScrollTop <= scrollTop;
+    var scrollingUp = nextScrollTop >= scrollTop;
+
+    var regular = !flipped;
+
+    // regular: scrolling absolute down = forwards, up = backwards
+    // flipped: scrolling absolute down = backwards, up = forwards
+
+    var scrollingForwards = xor(regular, scrollingDown);
+    var scrollingBackwards = xor(regular, scrollingUp);
+
+    var scrollingForwards2 = xor(flipped, scrollingUp);
+    var scrollingBackwards2 = xor(flipped, scrollingDown);
+
+    console.assert(scrollingForwards == scrollingForwards2);
+    console.assert(scrollingBackwards == scrollingBackwards2);
+
+    // if scrolling forwards, visibleRange increased or stayed the same.
+    // if scrolling backwards, visibleRange decreased or stayed the same.
+    if (scrollingForwards) {
+      console.assert(nextViewState.visibleStart >= viewState.visibleStart);
+      console.assert(nextViewState.visibleEnd >= viewState.visibleEnd);
+    }
+
+    if (scrollingBackwards) {
+      console.assert(nextViewState.visibleStart <= viewState.visibleStart);
+      console.assert(nextViewState.visibleEnd <= viewState.visibleEnd);
+    }
+  }
+}
 
 
 module.exports = Infinite;

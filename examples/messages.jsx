@@ -76,5 +76,9 @@ var MessagesDemo = React.createClass({
     }
 });
 
-var App = <div><MessagesDemo /><MessagesDemo flipped={true} /></div>;
-window.app = React.render(App, document.getElementById('messages-example'));
+var App = React.createClass({
+    render: function () {
+        return <div><MessagesDemo ref="a" /><MessagesDemo ref="b" flipped={true} /></div>;
+    }
+});
+window.app = React.render(<App />, document.getElementById('messages-example'));

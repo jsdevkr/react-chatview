@@ -2,6 +2,7 @@ var React = global.React || require('react');
 var _clone = require('lodash.clone');
 var spliceArraySegmentAt = require('./utils/splice_array_segment_at');
 var reductions = require('./utils/reductions');
+var xor = require('./utils/xor');
 var ViewState = require('./ViewState');
 
 var Infinite = React.createClass({
@@ -90,16 +91,42 @@ var Infinite = React.createClass({
           this.props.flipped);
 
 
-      // if scrolling forwards, visibleRange increased or stayed the same.
-      // if scrolling backwards, visibleRange decreased or stayed the same.
+      var isViewStateSettled = this.prevViewState !== null;
+      // These diagnostics only hold true after things settle down in flipped mode.
+      if (isViewStateSettled) {
+        // scrollTop increased = scrolling absolute down
+        var scrollingDown = nextState.scrollTop <= this.state.scrollTop;
+        var scrollingUp = nextState.scrollTop >= this.state.scrollTop;
 
-      // regular: scrollTop increased = scrolling down (forwards)
-      // flipped: scrollTop decreased = scrolling up (forwards)
+        var regular = !this.props.flipped;
+        var flipped = this.props.flipped;
 
+        // regular: scrolling absolute down = forwards, up = backwards
+        // flipped: scrolling absolute down = backwards, up = forwards
 
-      //var scrollDirection = this.viewState.scrollTop > nextState.scrollTop;
+        var scrollingForwards = xor(regular, scrollingDown);
+        var scrollingBackwards = xor(regular, scrollingUp);
 
+        var scrollingForwards2 = xor(flipped, scrollingUp);
+        var scrollingBackwards2 = xor(flipped, scrollingDown);
 
+        console.assert(scrollingForwards == scrollingForwards2);
+        console.assert(scrollingBackwards == scrollingBackwards2);
+
+        // if scrolling forwards, visibleRange increased or stayed the same.
+        // if scrolling backwards, visibleRange decreased or stayed the same.
+        if (scrollingForwards) {
+          console.assert(nextViewState.visibleStart >= this.viewState.visibleStart);
+          console.assert(nextViewState.visibleEnd >= this.viewState.visibleEnd);
+        }
+
+        if (scrollingBackwards) {
+          console.assert(nextViewState.visibleStart <= this.viewState.visibleStart);
+          console.assert(nextViewState.visibleEnd <= this.viewState.visibleEnd);
+        }
+      }
+
+      // Setup viewStates for render as if they were managed by react lifecycle.
       this.prevViewState = this.viewState;
       this.viewState = nextViewState;
     }
@@ -237,10 +264,10 @@ var Infinite = React.createClass({
     // should we track the actual scrollHeight to see how accurate we are?
     // this.refs.scrollable.getDOMNode().scrollHeight;
 
-    var loadedMoreChildren = this.viewState.numChildren !== this.prevViewState.numChildren;
-    if (loadedMoreChildren && this.props.flipped) {
-      
-    }
+    //var loadedMoreChildren = this.viewState.numChildren !== this.prevViewState.numChildren;
+    //if (loadedMoreChildren && this.props.flipped) {
+    //
+    //}
 
     this.writeDiagnostics();
   },

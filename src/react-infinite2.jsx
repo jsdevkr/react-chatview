@@ -155,7 +155,6 @@ var Infinite = React.createClass({
   },
 
   shouldTriggerLoad (scrollTop) {
-    return false;
     var viewState = this.viewState;
 
     if (!viewState.allHeightsMeasured) {

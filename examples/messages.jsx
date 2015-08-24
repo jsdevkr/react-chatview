@@ -58,7 +58,6 @@ var MessagesDemo = React.createClass({
                         onInfiniteLoad={this.handleInfiniteLoad}
                         loadingSpinnerDelegate={loadSpinner}
                         isInfiniteLoading={this.state.isInfiniteLoading}
-                        timeScrollStateLastsForAfterUserScrolls={1000}
                         diagnosticsDomElId={this.diagnosticsUuid}>
                         {elements}
                     </Infinite>

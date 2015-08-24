@@ -1,5 +1,6 @@
 var React = global.React || require('react');
 var _clone = require('lodash.clone');
+var _isEqual = require('lodash.isequal');
 var spliceArraySegmentAt = require('./utils/splice_array_segment_at');
 var reductions = require('./utils/reductions');
 var xor = require('./utils/xor');
@@ -231,7 +232,7 @@ var Infinite = React.createClass({
     // We have not measured their heights yet.
     // Do not store this in React state, because the view doesn't depend on them
     // and we don't want to cause a re-render.
-    var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item');
+    var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item:not(.infinite-load-spinner)');
     this.measuredHeights = measureChildHeights(domItems);
     this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
 
@@ -254,12 +255,17 @@ var Infinite = React.createClass({
     //    || this.prevViewState.measuredChildrenHeight === undefined);
 
     // Measure item node heights again because they may have changed.
-    var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item');
+    var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item:not(.infinite-load-spinner)');
     var updatedHeights = measureChildHeights(domItems);
+    if (this.props.flipped) {
+      updatedHeights.reverse();
+    }
 
     // in-place replacement of accumulated heights at this range with new measurements
-    spliceArraySegmentAt(this.measuredHeights, this.viewState.visibleStart, updatedHeights);
-    this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
+    if (!_isEqual(this.measuredHeights.slice(this.viewState.visibleStart), updatedHeights)) {
+      spliceArraySegmentAt(this.measuredHeights, this.viewState.visibleStart, updatedHeights);
+      this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
+    }
 
     // should we track the actual scrollHeight to see how accurate we are?
     // this.refs.scrollable.getDOMNode().scrollHeight;

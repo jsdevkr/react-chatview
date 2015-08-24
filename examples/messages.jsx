@@ -44,7 +44,7 @@ var MessagesDemo = React.createClass({
             return <div className="infinite-list-item" data-i={i} style={style}>{i} {record.text}</div>;
         });
 
-        var loadSpinner = <div className="infinite-list-item">Loading...</div>;
+        var loadSpinner = <div className="infinite-list-item infinite-load-spinner">Loading...</div>;
 
         // must pre-compute height of all elements
         return (

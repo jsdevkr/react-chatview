@@ -80,30 +80,35 @@ var Infinite = React.createClass({
     // in flipped mode, the viewState depends on prevViewState.
 
     if (this.state.scrollTop !== nextState.scrollTop) {
-      this.prevViewState = this.viewState;
-      this.viewState = ViewState.computeViewState(
-          this.state.scrollTop,
+      var nextViewState = ViewState.computeViewState(
+          nextState.scrollTop,
           this.props.containerHeight,
           this.measuredDistances,
-          this.prevViewState.measuredScrollableHeight,
+          this.viewState.measuredScrollableHeight,
           React.Children.count(this.props.children),
           this.props.maxChildren,
           this.props.flipped);
+
+
+      // if scrolling forwards, visibleRange increased or stayed the same.
+      // if scrolling backwards, visibleRange decreased or stayed the same.
+
+      // regular: scrollTop increased = scrolling down (forwards)
+      // flipped: scrollTop decreased = scrolling up (forwards)
+
+
+      //var scrollDirection = this.viewState.scrollTop > nextState.scrollTop;
+
+
+      this.prevViewState = this.viewState;
+      this.viewState = nextViewState;
     }
   },
 
 
   render () {
-    var flipped = this.props.flipped;
-    var isFirstRender = this.prevViewState === null;
-    if (flipped && isFirstRender) {
-      flipped = false; // don't think this matters in render, only for state computation.
-    }
-
-    var viewState = this.viewState;
-
-    var displayables = this.props.children.slice(viewState.visibleStart, viewState.visibleEnd);
-    if (flipped) {
+    var displayables = this.props.children.slice(this.viewState.visibleStart, this.viewState.visibleEnd);
+    if (this.props.flipped) {
       displayables.reverse();
     }
 
@@ -111,18 +116,18 @@ var Infinite = React.createClass({
       {this.state.isInfiniteLoading ? this.props.loadingSpinnerDelegate : null}
     </div>;
 
-    var topSpace = !flipped ? viewState.frontSpace : viewState.backSpace;
-    var bottomSpace = !flipped ? viewState.backSpace : viewState.frontSpace;
+    var topSpace = !this.props.flipped ? this.viewState.frontSpace : this.viewState.backSpace;
+    var bottomSpace = !this.props.flipped ? this.viewState.backSpace : this.viewState.frontSpace;
 
     return (
       <div className={this.props.className} ref="scrollable" onScroll={this.onScroll}
-           style={buildScrollableStyle(viewState.apertureHeight)}>
+           style={buildScrollableStyle(this.viewState.apertureHeight)}>
         <div ref="smoothScrollingWrapper" style={this.state.isScrolling ? { pointerEvents: 'none' } : {}}>
-          {flipped ? loadSpinner : null}
+          {this.props.flipped ? loadSpinner : null}
           <div ref="topSpacer" style={buildHeightStyle(topSpace)}/>
           {displayables}
           <div ref="bottomSpacer" style={buildHeightStyle(bottomSpace)}/>
-          {flipped ? null : loadSpinner}
+          {this.props.flipped ? null : loadSpinner}
         </div>
       </div>
     );
@@ -248,7 +253,9 @@ var Infinite = React.createClass({
       };
       var diagnosticsString = JSON.stringify(diagnostics, undefined, 2);
       var domEl = document.getElementById(this.props.diagnosticsDomElId);
-      domEl.textContent = diagnosticsString;
+      if (domEl) {
+        domEl.textContent = diagnosticsString;
+      }
     }
   }
 });

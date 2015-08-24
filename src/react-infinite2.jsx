@@ -33,7 +33,6 @@ var Infinite = React.createClass({
   getInitialState () {
     this.measuredHeights = []; // actual heights of items measured from dom as we see them
     this.measuredDistances = []; // computed pixel distance of each item from the window top
-    this.prevMeasuredScrollableHeight = null;
     this.viewState = null;
     this.prevViewState = null;
     // Stored out-of-band of react state because the view doesn't depend on this, only scroll handlers,
@@ -47,27 +46,61 @@ var Infinite = React.createClass({
     };
   },
 
-  render () {
-
+  componentWillMount () {
     // Flipped mode is weird on first render, because it depends on knowing the scrollableHeight.
     // If we don't have it, we have to render regularly for just one frame, to measure it.
+    // Forward and flipped rendering are symmetrical wrt measuring the children so the
+    // measurement is accurate.
     // It's okay - we can't set the scrollbar pos to the bottom until after first render also.
+    // After first render, we set the scrollbar pos, which triggers a new render, which will
+    // properly render flipped.
+
     var flipped = this.props.flipped;
-    var isFirstRender = this.prevMeasuredScrollableHeight === null;
+    var isFirstRender = this.prevViewState === null;
     if (flipped && isFirstRender) {
       flipped = false;
     }
 
-    this.prevViewState = this.viewState; // maybe helpful for diagnostics
-    var viewState = ViewState.computeViewState( // move to willUpdate?
+    // calculated viewState is needed in render, lifecycle methods and events.
+    this.prevViewState = null;
+    this.viewState = ViewState.computeViewState(
         this.state.scrollTop, // scrollTop is always the height of aperatureTop, measured from the scrollable bottom.
         this.props.containerHeight,
         this.measuredDistances,
-        this.prevMeasuredScrollableHeight,
+        this.prevViewState !== null ? this.prevViewState.measuredScrollableHeight : null,
         React.Children.count(this.props.children),
         this.props.maxChildren,
         flipped);
-    this.viewState = viewState; // calculated viewState is needed in events and lifecycle methods.
+  },
+
+  componentWillUpdate (nextProps, nextState) {
+    // viewState is a function of state.scrollTop only - it is not a function of the other
+    // state keys: isScrolling, isInfiniteLoading, scrollTimeout.
+    // Do not recompute viewstate when these other state keys change. This matters a lot because
+    // in flipped mode, the viewState depends on prevViewState.
+
+    if (this.state.scrollTop !== nextState.scrollTop) {
+      this.prevViewState = this.viewState;
+      this.viewState = ViewState.computeViewState(
+          this.state.scrollTop,
+          this.props.containerHeight,
+          this.measuredDistances,
+          this.prevViewState.measuredScrollableHeight,
+          React.Children.count(this.props.children),
+          this.props.maxChildren,
+          this.props.flipped);
+    }
+  },
+
+
+  render () {
+    var flipped = this.props.flipped;
+    var isFirstRender = this.prevViewState === null;
+    if (flipped && isFirstRender) {
+      flipped = false; // don't think this matters in render, only for state computation.
+    }
+
+    var viewState = this.viewState;
 
     var displayables = this.props.children.slice(viewState.visibleStart, viewState.visibleEnd);
     if (flipped) {
@@ -120,7 +153,7 @@ var Infinite = React.createClass({
     var new_apertureTop = scrollTop;
     var new_visibleEnd_DistanceFromFront = !this.props.flipped
         ? new_apertureTop
-        : viewState.prevMeasuredScrollableHeight - new_apertureTop;
+        : viewState.measuredScrollableHeight - new_apertureTop;
 
     var whatIsThisNumber =
         viewState.measuredChildrenHeight -
@@ -170,9 +203,6 @@ var Infinite = React.createClass({
     this.measuredHeights = measureChildHeights(domItems);
     this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
 
-    // For flipped mode - need to know the scrollableHeight to compute the visible range.
-    this.prevMeasuredScrollableHeight = this.refs.scrollable.getDOMNode().scrollHeight;
-
     if (this.props.flipped) {
       // Set scrollbar position to all the way at bottom.
       var scrollableDomEl = this.refs.scrollable.getDOMNode();
@@ -199,7 +229,8 @@ var Infinite = React.createClass({
     spliceArraySegmentAt(this.measuredHeights, this.viewState.visibleStart, updatedHeights);
     this.measuredDistances = reductions(this.measuredHeights, (acc, val) => { return acc+val; });
 
-    this.prevMeasuredScrollableHeight = this.refs.scrollable.getDOMNode().scrollHeight;
+    // should we track the actual scrollHeight to see how accurate we are?
+    // this.refs.scrollable.getDOMNode().scrollHeight;
 
     var loadedMoreChildren = this.viewState.numChildren !== this.prevViewState.numChildren;
     if (loadedMoreChildren && this.props.flipped) {

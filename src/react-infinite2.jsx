@@ -301,7 +301,9 @@ function measureChildHeights (domItems) {
   // It doesn't really matter - a few pixels isn't a big deal for this component.
   var xs = [];
   for (var i=0; i<domItems.length; ++i) {
-    xs.push(domItems[i].clientHeight);
+    //var elHeight = domItems[i].clientHeight;
+    var elHeight = domItems[i].getClientRects()[0].height;
+    xs.push(elHeight);
   }
   return xs;
 }

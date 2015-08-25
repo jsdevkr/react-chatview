@@ -35,58 +35,56 @@ var Infinite = React.createClass({
   getInitialState () {
     this.measuredHeights = []; // actual heights of items measured from dom as we see them
     this.measuredDistances = []; // computed pixel distance of each item from the window top
-    this.viewState = null;
-    this.prevViewState = null;
-    // Stored out-of-band of react state because the view doesn't depend on this, only scroll handlers,
-    // we don't want to trigger component updates when we compute it.
+    // Stored out-of-band of react state because we don't want to trigger component updates when
+    // we measure it in a lifecycle method.
+
+
+    /**
+     * Always ignore flipped mode the first render.
+     * Flipped mode needs a dom measurement, but the modes are symmetrical so we can measure it from
+     * regular mode. The first "frame" will render regular mode, but the very next tick we will render
+     * in flipped mode.
+     * It's okay - we can't set the scrollbar pos to the bottom until after first render also.
+     * After first render, we set the scrollbar pos, which triggers a new render, which will
+     * properly render flipped.
+     */
+    var flipped = false;
+    var scrollTop = 0; // regular mode initial scroll
+    var prevMeasuredScrollableHeight = null; // Required for flipped mode only.
+
+    var viewState = ViewState.computeViewState(
+        scrollTop,
+        this.props.containerHeight,
+        this.measuredDistances,
+        prevMeasuredScrollableHeight,
+        React.Children.count(this.props.children),
+        this.props.maxChildren,
+        flipped);
 
     return {
-      scrollTop: 0,
+      computedView: viewState,
+      isFirstRender: true,
       scrollTimeout: null,
       isScrolling: false,
       isInfiniteLoading: false
     };
   },
 
-  componentWillMount () {
-    // Flipped mode is weird on first render, because it depends on knowing the scrollableHeight.
-    // If we don't have it, we have to render regularly for just one frame, to measure it.
-    // Forward and flipped rendering are symmetrical wrt measuring the children so the
-    // measurement is accurate.
-    // It's okay - we can't set the scrollbar pos to the bottom until after first render also.
-    // After first render, we set the scrollbar pos, which triggers a new render, which will
-    // properly render flipped.
+  componentWillMount () {},
 
-    var flipped = this.props.flipped;
-    var isFirstRender = this.prevViewState === null;
-    if (flipped && isFirstRender) {
-      flipped = false;
-    }
-
-    // calculated viewState is needed in render, lifecycle methods and events.
-    this.prevViewState = null;
-    this.viewState = ViewState.computeViewState(
-        this.state.scrollTop, // scrollTop is always the height of aperatureTop, measured from the scrollable bottom.
-        this.props.containerHeight,
-        this.measuredDistances,
-        this.prevViewState !== null ? this.prevViewState.measuredScrollableHeight : null,
-        React.Children.count(this.props.children),
-        this.props.maxChildren,
-        flipped);
-  },
-
-  componentWillUpdate (nextProps, nextState) {
-    if (this.state.scrollTop !== nextState.scrollTop) {
-      verifyVisibleRangeMonotonicallyIncreasing(
-          nextProps.flipped, this.state.scrollTop, nextState.scrollTop,
-          this.prevViewState, this.viewState // these two better be lined up right...
-      );
-    }
-  },
+  //componentWillUpdate (nextProps, nextState) {
+  //  if (this.state.scrollTop !== nextState.scrollTop) {
+  //    verifyVisibleRangeMonotonicallyIncreasing(
+  //        nextProps.flipped, this.state.scrollTop, nextState.scrollTop,
+  //        this.prevViewState, this.viewState // these two better be lined up right...
+  //    );
+  //  }
+  //},
 
 
   render () {
-    var displayables = this.props.children.slice(this.viewState.visibleStart, this.viewState.visibleEnd);
+    var viewState = this.state.computedView;
+    var displayables = this.props.children.slice(viewState.visibleStart, viewState.visibleEnd);
     if (this.props.flipped) {
       displayables.reverse();
     }
@@ -95,12 +93,12 @@ var Infinite = React.createClass({
       {this.state.isInfiniteLoading ? this.props.loadingSpinnerDelegate : null}
     </div>;
 
-    var topSpace = !this.props.flipped ? this.viewState.frontSpace : this.viewState.backSpace;
-    var bottomSpace = !this.props.flipped ? this.viewState.backSpace : this.viewState.frontSpace;
+    var topSpace = !this.props.flipped ? viewState.frontSpace : viewState.backSpace;
+    var bottomSpace = !this.props.flipped ? viewState.backSpace : viewState.frontSpace;
 
     return (
       <div className={this.props.className} ref="scrollable" onScroll={this.onScroll}
-           style={buildScrollableStyle(this.viewState.apertureHeight)}>
+           style={buildScrollableStyle(viewState.apertureHeight)}>
         <div ref="smoothScrollingWrapper" style={this.state.isScrolling ? { pointerEvents: 'none' } : {}}>
           {this.props.flipped ? loadSpinner : null}
           <div ref="topSpacer" style={buildHeightStyle(topSpace)}/>
@@ -122,39 +120,27 @@ var Infinite = React.createClass({
         scrollTop,
         this.props.containerHeight,
         this.measuredDistances,
-        this.viewState.measuredScrollableHeight,
+        this.state.computedView.measuredScrollableHeight,
         React.Children.count(this.props.children),
         this.props.maxChildren,
         this.props.flipped);
 
     // if flipped and the measuredHeight changed, adjust the scrollTop here. hack
     var heightDifference = nextViewState.measuredScrollableHeight - nextViewState.prevMeasuredScrollableHeight;
-    var isFirstRender = this.prevViewState === null;
-    if (!isFirstRender && this.props.flipped && heightDifference !== 0) {
-      e.target.scrollTop = scrollTop + heightDifference; // !!! Causes onScroll to fire again !!!
-
-      // I expected to need to return here! WTF is going on! If I return here,
-      // it breaks.
-      // ... That's because we need to render with the new viewstate to even
-      // have the expected height difference happen.
-      //return; // we will fire again with a new scrollTop and pass this here.
+    if (!this.state.isFirstRender && this.props.flipped && heightDifference !== 0) {
+      e.target.scrollTop = scrollTop + heightDifference; // !!! This causes onScroll to fire again with new scrollTop !!!
     }
 
-    if (this.shouldTriggerLoad(scrollTop)) {
-      this.setState({ isInfiniteLoading: true, scrollTop: scrollTop });
+    if (this.shouldTriggerLoad(scrollTop, nextViewState)) {
+      this.setState({ isInfiniteLoading: true, computedView: nextViewState, isFirstRender: false });
       this.props.onInfiniteLoad();
     }
     else {
-      this.setState({ scrollTop: scrollTop });
+      this.setState({ computedView: nextViewState, isFirstRender: false });
     }
-
-    this.prevViewState = this.viewState;
-    this.viewState = nextViewState;
   },
 
-  shouldTriggerLoad (scrollTop) {
-    var viewState = this.viewState;
-
+  shouldTriggerLoad (scrollTop, viewState) {
     if (!viewState.allHeightsMeasured) {
       return false; // If we haven't seen all the nodes, we aren't ready to trigger a load. -- this is wrongish
     }
@@ -240,8 +226,8 @@ var Infinite = React.createClass({
     }
 
     // in-place replacement of accumulated heights at this range with new measurements
-    if (!_isEqual(this.measuredHeights.slice(this.viewState.visibleStart), updatedHeights)) {
-      spliceArraySegmentAt(this.measuredHeights, this.viewState.visibleStart, updatedHeights);
+    if (!_isEqual(this.measuredHeights.slice(this.state.computedView.visibleStart), updatedHeights)) {
+      spliceArraySegmentAt(this.measuredHeights, this.state.computedView.visibleStart, updatedHeights);
       this.measuredDistances = this.measuredHeights.length > 0
           ? reductions(this.measuredHeights, (acc, val) => { return acc+val; })
           : [];
@@ -260,11 +246,7 @@ var Infinite = React.createClass({
 
   writeDiagnostics () {
     if (this.props.diagnosticsDomElId) {
-      var diagnostics = {
-        reactState: this.state,
-        viewState: this.viewState
-      };
-      var diagnosticsString = JSON.stringify(diagnostics, undefined, 2);
+      var diagnosticsString = JSON.stringify(this.state, undefined, 2);
       var domEl = document.getElementById(this.props.diagnosticsDomElId);
       if (domEl) {
         domEl.textContent = diagnosticsString;

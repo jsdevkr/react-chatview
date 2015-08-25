@@ -21,6 +21,8 @@ var bs = require('./utils/binary_index_search');
  * It has nothing to do with the apertureHeight. If all heights aren't known, we can't know the
  * perfectMeasuredScrollableHeight. Determined by browser layout. Reverse mode depends on this value,
  * so in reverse mode, we always render in forward mode once, measure, then immediately re-render.
+ *
+ * scrollableDomEl.scrollTop is always the height of aperatureTop, measured from the scrollable bottom.
  **/
 function computeViewState (apertureTop, apertureHeight, measuredDistances, prevMeasuredScrollableHeight,
                            numChildren, maxChildrenPerScreen, flipped) {

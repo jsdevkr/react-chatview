@@ -72,14 +72,14 @@ var Infinite = React.createClass({
 
   componentWillMount () {},
 
-  //componentWillUpdate (nextProps, nextState) {
-  //  if (this.state.scrollTop !== nextState.scrollTop) {
-  //    verifyVisibleRangeMonotonicallyIncreasing(
-  //        nextProps.flipped, this.state.scrollTop, nextState.scrollTop,
-  //        this.prevViewState, this.viewState // these two better be lined up right...
-  //    );
-  //  }
-  //},
+  componentWillUpdate (nextProps, nextState) {
+    if (this.state.computedView.apertureTop !== nextState.computedView.apertureTop) {
+      verifyVisibleRangeMonotonicallyIncreasing(
+          nextProps.flipped, this.state.computedView.apertureTop, nextState.computedView.apertureTop,
+          this.state.computedView, nextState.computedView
+      );
+    }
+  },
 
 
   render () {

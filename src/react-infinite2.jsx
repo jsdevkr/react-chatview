@@ -129,17 +129,15 @@ var Infinite = React.createClass({
 
     // if flipped and the measuredHeight changed, adjust the scrollTop here. hack
     var heightDifference = nextViewState.measuredScrollableHeight - nextViewState.prevMeasuredScrollableHeight;
-    if (this.props.flipped && heightDifference !== 0) {
-      scrollTop = scrollTop + heightDifference; // has to happen before viewstate computed.
-      // Compute it again.
-      nextViewState = ViewState.computeViewState(
-          scrollTop,
-          this.props.containerHeight,
-          this.measuredDistances,
-          this.viewState.measuredScrollableHeight,
-          React.Children.count(this.props.children),
-          this.props.maxChildren,
-          this.props.flipped);
+    var isFirstRender = this.prevViewState === null;
+    if (!isFirstRender && this.props.flipped && heightDifference !== 0) {
+      e.target.scrollTop = scrollTop + heightDifference; // !!! Causes onScroll to fire again !!!
+
+      // I expected to need to return here! WTF is going on! If I return here,
+      // it breaks.
+      // ... That's because we need to render with the new viewstate to even
+      // have the expected height difference happen.
+      //return; // we will fire again with a new scrollTop and pass this here.
     }
 
     if (this.shouldTriggerLoad(scrollTop)) {

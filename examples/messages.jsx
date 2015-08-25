@@ -31,7 +31,7 @@ var MessagesDemo = React.createClass({
                 isInfiniteLoading: false,
                 messages: this.state.messages.concat(buildMessages(25))
             });
-        }.bind(this), 2500);
+        }.bind(this), 1000);
     },
 
     componentWillMount: function () {

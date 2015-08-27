@@ -137,6 +137,9 @@ var Infinite = React.createClass({
     // if flipped and the measuredHeight changed, adjust the scrollTop here. hack
     var heightDifference = nextViewState.measuredScrollableHeight - nextViewState.prevMeasuredScrollableHeight;
     if (!this.state.isFirstRender && this.props.flipped && heightDifference !== 0) {
+      // This line kills performance in firefox and probably breaks hw accelerated scrolling in all browsers.
+      // One possible solution is to wait for the scrolling to settle before adjusting this.
+      // Or, better, figure out a way to adjust this by changing the spacer heights, never the scrollTop.
       scrollableDomEl.scrollTop = scrollTop + heightDifference; // !!! This causes onScroll to fire again with new scrollTop !!!
     }
 

@@ -37,6 +37,7 @@ var Infinite = React.createClass({
     this.measuredDistances = []; // computed pixel distance of each item from the window top
     // Stored out-of-band of react state because we don't want to trigger component updates when
     // we measure it in a lifecycle method.
+    this.rafRequestId = null; // for cleaning up outstanding requestAnimationFrames on WillUnmount
 
 
     /**
@@ -96,8 +97,10 @@ var Infinite = React.createClass({
     var topSpace = !this.props.flipped ? viewState.frontSpace : viewState.backSpace;
     var bottomSpace = !this.props.flipped ? viewState.backSpace : viewState.frontSpace;
 
+    // Must not hook onScroll event directly - that will break hardware accelerated scrolling.
+    // We poll it with requestAnimationFrame instead.
     return (
-      <div className={this.props.className} ref="scrollable" onScroll={this.onScroll}
+      <div className={this.props.className} ref="scrollable"
            style={buildScrollableStyle(viewState.apertureHeight)}>
         <div ref="smoothScrollingWrapper" style={this.state.isScrolling ? { pointerEvents: 'none' } : {}}>
           {this.props.flipped ? loadSpinner : null}
@@ -110,12 +113,18 @@ var Infinite = React.createClass({
     );
   },
 
-  onScroll (e) {
-    console.assert(e.target === this.refs.scrollable.getDOMNode());
+  pollScroll () {
+    var scrollableDomEl = this.refs.scrollable.getDOMNode();
+    if (scrollableDomEl.scrollTop !== this.state.computedView.apertureTop) {
+      this.onScroll(scrollableDomEl);
+    }
 
+    this.rafRequestId = window.requestAnimationFrame(this.pollScroll);
+  },
+
+  onScroll (scrollableDomEl) {
+    var scrollTop = scrollableDomEl.scrollTop;
     this.manageScrollTimeouts();
-
-    var scrollTop = e.target.scrollTop;
     var nextViewState = ViewState.computeViewState(
         scrollTop,
         this.props.containerHeight,
@@ -128,7 +137,7 @@ var Infinite = React.createClass({
     // if flipped and the measuredHeight changed, adjust the scrollTop here. hack
     var heightDifference = nextViewState.measuredScrollableHeight - nextViewState.prevMeasuredScrollableHeight;
     if (!this.state.isFirstRender && this.props.flipped && heightDifference !== 0) {
-      e.target.scrollTop = scrollTop + heightDifference; // !!! This causes onScroll to fire again with new scrollTop !!!
+      scrollableDomEl.scrollTop = scrollTop + heightDifference; // !!! This causes onScroll to fire again with new scrollTop !!!
     }
 
     if (this.shouldTriggerLoad(scrollTop, nextViewState)) {
@@ -212,6 +221,11 @@ var Infinite = React.createClass({
     }
 
     this.writeDiagnostics();
+    this.rafRequestId = window.requestAnimationFrame(this.pollScroll);
+  },
+
+  componentWillUnmount () {
+    window.cancelAnimationFrame(this.rafRequestId);
   },
 
   componentDidUpdate (prevProps, prevState) {

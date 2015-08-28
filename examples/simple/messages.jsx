@@ -2,7 +2,7 @@
 var MessagesDemo = React.createClass({
     getInitialState: function() {
         return {
-            messages: buildMessages(50),
+            messages: randomMessages(50),
             isInfiniteLoading: false
         };
     },
@@ -12,7 +12,7 @@ var MessagesDemo = React.createClass({
         setTimeout(function() {
             this.setState({
                 isInfiniteLoading: false,
-                messages: this.state.messages.concat(buildMessages(25))
+                messages: this.state.messages.concat(randomMessages(25))
             });
         }.bind(this), 1000);
     },
@@ -29,7 +29,6 @@ var MessagesDemo = React.createClass({
 
         var loadSpinner = <div className="infinite-list-item infinite-load-spinner">Loading...</div>;
 
-        // must pre-compute height of all elements
         return (
             <div className="MessagesDemo">
                 <div className="chat">
@@ -54,7 +53,7 @@ var MessagesDemo = React.createClass({
 
     receiveNewMessage: function () {
         this.setState({
-            messages: buildMessages(1).concat(this.state.messages)
+            messages: randomMessages(1).concat(this.state.messages)
         });
     }
 });

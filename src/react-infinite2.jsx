@@ -140,6 +140,8 @@ var Infinite = React.createClass({
       // This line kills performance in firefox and probably breaks hw accelerated scrolling in all browsers.
       // One possible solution is to wait for the scrolling to settle before adjusting this.
       // Or, better, figure out a way to adjust this by changing the spacer heights, never the scrollTop.
+      // Basically, we can never ever write to scrollTop while the user is scrolling. We may write to it
+      // only when the scrolling is stopped.
       scrollableDomEl.scrollTop = scrollTop + heightDifference; // !!! This causes onScroll to fire again with new scrollTop !!!
     }
 

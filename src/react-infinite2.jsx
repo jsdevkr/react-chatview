@@ -329,14 +329,17 @@ function verifyVisibleRangeMonotonicallyIncreasing (flipped, scrollTop, nextScro
 
     // if scrolling forwards, visibleRange increased or stayed the same.
     // if scrolling backwards, visibleRange decreased or stayed the same.
+
+    // visibleEnd can't be asserted because the algorithm might not put a consistent number of nodes in the dom.
+    // maybe this is the problem?
     if (scrollingForwards) {
       console.assert(nextViewState.visibleStart >= viewState.visibleStart);
-      console.assert(nextViewState.visibleEnd >= viewState.visibleEnd);
+      //console.assert(nextViewState.visibleEnd >= viewState.visibleEnd);
     }
 
     if (scrollingBackwards) {
       console.assert(nextViewState.visibleStart <= viewState.visibleStart);
-      console.assert(nextViewState.visibleEnd <= viewState.visibleEnd);
+      //console.assert(nextViewState.visibleEnd <= viewState.visibleEnd);
     }
   }
 }

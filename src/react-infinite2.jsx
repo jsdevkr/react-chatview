@@ -1,6 +1,7 @@
 var React = global.React || require('react');
 var _clone = require('lodash.clone');
 var _isEqual = require('lodash.isequal');
+var _last = require('lodash.last');
 var spliceArraySegmentAt = require('./utils/splice_array_segment_at');
 var reductions = require('./utils/reductions');
 var xor = require('./utils/xor');
@@ -85,7 +86,7 @@ var Infinite = React.createClass({
 
   render () {
     var viewState = this.state.computedView;
-    var displayables = this.props.children.slice(viewState.visibleStart, viewState.visibleEnd);
+    var displayables = _clone(this.props.children); //this.props.children.slice(viewState.visibleStart, viewState.visibleEnd);
     if (this.props.flipped) {
       displayables.reverse();
     }
@@ -94,8 +95,8 @@ var Infinite = React.createClass({
       {this.state.isInfiniteLoading ? this.props.loadingSpinnerDelegate : null}
     </div>;
 
-    var topSpace = !this.props.flipped ? viewState.frontSpace : viewState.backSpace;
-    var bottomSpace = !this.props.flipped ? viewState.backSpace : viewState.frontSpace;
+    var topSpace = 0; //!this.props.flipped ? viewState.frontSpace : viewState.backSpace;
+    var bottomSpace = 0; //!this.props.flipped ? viewState.backSpace : viewState.frontSpace;
 
     // Must not hook onScroll event directly - that will break hardware accelerated scrolling.
     // We poll it with requestAnimationFrame instead.
@@ -114,51 +115,38 @@ var Infinite = React.createClass({
   },
 
   pollScroll () {
-    var scrollableDomEl = this.refs.scrollable.getDOMNode();
-    if (scrollableDomEl.scrollTop !== this.state.computedView.apertureTop) {
-      this.onScroll(scrollableDomEl);
+    // We are allowed to recompute the viewState here, but we are not
+    // allowed to write to scrollTop here, which can abruptly halt in-progress user scrolling.
+    var scrollTop = this.refs.scrollable.getDOMNode().scrollTop;
+    if (scrollTop !== this.state.computedView.apertureTop) {
+      this.manageScrollTimeouts();
+      var nextViewState = this.setViewState(this.props, scrollTop);
+      if (this.shouldTriggerLoad(scrollTop, nextViewState)) {
+        this.props.onInfiniteLoad();
+        this.setState({ isInfiniteLoading: true });
+      }
+      // DO NOT effect domEl.scrollTop. Do this when the new children hit dom in didUpdate
     }
-
     this.rafRequestId = window.requestAnimationFrame(this.pollScroll);
   },
 
-  onScroll (scrollableDomEl) {
-    var scrollTop = scrollableDomEl.scrollTop;
-    this.manageScrollTimeouts();
+  setViewState (props, scrollTop) {
+    // Can't inspect props directly, sometimes we're dealing with a future view state from
+    // componentWillReceiveNewProps. That method can't setState, so we can safely inspect this.state.
     var nextViewState = ViewState.computeViewState(
         scrollTop,
-        this.props.containerHeight,
+        props.containerHeight,
         this.measuredDistances,
         this.state.computedView.measuredScrollableHeight,
-        React.Children.count(this.props.children),
-        this.props.maxChildren,
-        this.props.flipped);
+        React.Children.count(props.children),
+        props.maxChildren,
+        props.flipped);
 
-    // if flipped and the measuredHeight changed, adjust the scrollTop here. hack
-    var heightDifference = nextViewState.measuredScrollableHeight - nextViewState.prevMeasuredScrollableHeight;
-    if (!this.state.isFirstRender && this.props.flipped && heightDifference !== 0) {
-      // This line kills performance in firefox and probably breaks hw accelerated scrolling in all browsers.
-      // One possible solution is to wait for the scrolling to settle before adjusting this.
-      // Or, better, figure out a way to adjust this by changing the spacer heights, never the scrollTop.
-      // Basically, we can never ever write to scrollTop while the user is scrolling. We may write to it
-      // only when the scrolling is stopped.
-      scrollableDomEl.scrollTop = scrollTop + heightDifference; // !!! This causes onScroll to fire again with new scrollTop !!!
-    }
-
-    if (this.shouldTriggerLoad(scrollTop, nextViewState)) {
-      this.setState({ isInfiniteLoading: true, computedView: nextViewState, isFirstRender: false });
-      this.props.onInfiniteLoad();
-    }
-    else {
-      this.setState({ computedView: nextViewState, isFirstRender: false });
-    }
+    this.setState({computedView: nextViewState, isFirstRender: false});
+    return nextViewState;
   },
 
   shouldTriggerLoad (scrollTop, viewState) {
-    if (!viewState.allHeightsMeasured) {
-      return false; // If we haven't seen all the nodes, we aren't ready to trigger a load. -- this is wrongish
-    }
-
     var new_apertureTop = scrollTop;
     var new_visibleEnd_DistanceFromFront = !this.props.flipped
         ? new_apertureTop
@@ -196,10 +184,21 @@ var Infinite = React.createClass({
   },
 
   componentWillReceiveProps (nextProps) {
+    var isInfiniteLoading = nextProps.isInfiniteLoading !== undefined
+        ? nextProps.isInfiniteLoading
+        : this.state.isInfiniteLoading;
+
+    if (React.Children.count(this.props.children) !== React.Children.count(nextProps.children)) {
+      // https://github.com/facebook/react/issues/2659
+      this.setViewState(nextProps, this.getDOMNode().scrollTop);
+      // The new children are about to be rendered. We haven't measured them yet. Somehow we need to adjust the
+      // scrollTop to account for any new children that loaded above us. Render them now without adjusting scrollTop.
+      // Then, browser will reflow, then we can measure the scrollTop in didUpdate and fix it up,
+      // this happens before repaint.  https://github.com/facebook/react/issues/2659
+    }
+
     this.setState({
-      // preloadBatchSize
-      isInfiniteLoading: nextProps.isInfiniteLoading !== undefined
-          ? nextProps.isInfiniteLoading : this.state.isInfiniteLoading
+      isInfiniteLoading: isInfiniteLoading
     })
   },
 
@@ -245,20 +244,38 @@ var Infinite = React.createClass({
     }
 
     // in-place replacement of accumulated heights at this range with new measurements
-    if (!_isEqual(this.measuredHeights.slice(this.state.computedView.visibleStart), updatedHeights)) {
-      spliceArraySegmentAt(this.measuredHeights, this.state.computedView.visibleStart, updatedHeights);
-      this.measuredDistances = this.measuredHeights.length > 0
-          ? reductions(this.measuredHeights, (acc, val) => { return acc+val; })
-          : [];
-    }
-
-    // should we track the actual scrollHeight to see how accurate we are?
-    // this.refs.scrollable.getDOMNode().scrollHeight;
-
-    //var loadedMoreChildren = this.viewState.numChildren !== this.prevViewState.numChildren;
-    //if (loadedMoreChildren && this.props.flipped) {
-    //
+    //if (!_isEqual(this.measuredHeights.slice(this.state.computedView.visibleStart), updatedHeights)) {
+    //  spliceArraySegmentAt(this.measuredHeights, this.state.computedView.visibleStart, updatedHeights);
+    //  this.measuredDistances = this.measuredHeights.length > 0
+    //      ? reductions(this.measuredHeights, (acc, val) => { return acc+val; })
+    //      : [];
     //}
+
+    // Simpler logic because we always draw all the children.
+    this.measuredHeights = updatedHeights;
+    this.measuredDistances = this.measuredHeights.length > 0
+        ? reductions(this.measuredHeights, (acc, val) => { return acc+val; })
+        : [];
+
+    var loadedMoreChildren = this.state.computedView.numChildren !== prevState.computedView.numChildren;
+    // Will need to check the height difference, not the num children, TODO.
+    // if flipped and the measuredHeight changed, adjust the scrollTop so user perceives no jump if items
+    // are loaded above them in the DOM. This needs to happen in forwards mode too but the math will be different,
+    // e.g. in the case of a new message came, or an image resized below us.
+
+    if (loadedMoreChildren && this.props.flipped) {
+      // We have just measured the heights right above! The viewState measuredChildrenHeights is one tick behind, i think.
+      var exactChildrenHeight = _last(this.measuredDistances);
+      var prevExactChildrenHeight = this.state.computedView.measuredChildrenHeight;
+      var heightDifference = exactChildrenHeight - prevExactChildrenHeight;
+
+      // Setting scrollTop can halt user scrolling (and disables hardware acceleration)
+      // In firefox, the user scrolling actually is interrupted. Other browsers can keep up.
+      // Basically, we can never ever write to scrollTop while the user is scrolling. We may write to it
+      // only when the scrolling is stopped. That's why we're doing it here when we receive new children,
+      // the user is probably already waiting and not actively scrolling.
+      this.getDOMNode().scrollTop += heightDifference; // will cause viewState to recompute next tick
+    }
 
     this.writeDiagnostics();
   },

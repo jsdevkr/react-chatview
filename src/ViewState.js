@@ -24,7 +24,7 @@ var bs = require('./utils/binary_index_search');
  *
  * scrollableDomEl.scrollTop is always the height of aperatureTop, measured from the scrollable bottom.
  **/
-function computeViewState (apertureTop, apertureHeight, measuredDistances, prevMeasuredScrollableHeight,
+function computeViewState (apertureTop, apertureHeight, measuredDistances, measuredLoadSpinner, prevMeasuredScrollableHeight,
                            numChildren, maxChildrenPerScreen, flipped) {
 
   var apertureBottom = apertureTop + apertureHeight;
@@ -212,8 +212,10 @@ function computeViewState (apertureTop, apertureHeight, measuredDistances, prevM
     prevMeasuredScrollableHeight: prevMeasuredScrollableHeight, // really measured from dom
 
     numChildren: numChildren,
-    maxChildrenPerScreen: maxChildrenPerScreen
-    //,measuredDistances: measuredDistances
+    maxChildrenPerScreen: maxChildrenPerScreen,
+
+    measuredDistances: measuredDistances,
+    measuredLoadSpinner: measuredLoadSpinner
   };
 }
 

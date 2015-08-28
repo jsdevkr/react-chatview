@@ -2,6 +2,7 @@ var React = global.React || require('react');
 var _clone = require('lodash.clone');
 var _isEqual = require('lodash.isequal');
 var _last = require('lodash.last');
+var _omit = require('lodash.omit');
 var spliceArraySegmentAt = require('./utils/splice_array_segment_at');
 var reductions = require('./utils/reductions');
 var xor = require('./utils/xor');
@@ -36,8 +37,10 @@ var Infinite = React.createClass({
   getInitialState () {
     this.measuredHeights = []; // actual heights of items measured from dom as we see them
     this.measuredDistances = []; // computed pixel distance of each item from the window top
+    this.measuredLoadSpinner = 0; // if we have a load spinner, this is the last measured height
     // Stored out-of-band of react state because we don't want to trigger component updates when
-    // we measure it in a lifecycle method.
+    // we measure it in a lifecycle method. They are duplicated into react state (part of the viewState)
+    // but that is just to provide consistent access to past values of the system.
     this.rafRequestId = null; // for cleaning up outstanding requestAnimationFrames on WillUnmount
 
 
@@ -58,6 +61,7 @@ var Infinite = React.createClass({
         scrollTop,
         this.props.containerHeight,
         this.measuredDistances,
+        this.measuredLoadSpinner,
         prevMeasuredScrollableHeight,
         React.Children.count(this.props.children),
         this.props.maxChildren,
@@ -137,6 +141,7 @@ var Infinite = React.createClass({
         scrollTop,
         props.containerHeight,
         this.measuredDistances,
+        this.measuredLoadSpinner,
         this.state.computedView.measuredScrollableHeight,
         React.Children.count(props.children),
         props.maxChildren,
@@ -256,6 +261,7 @@ var Infinite = React.createClass({
     this.measuredDistances = this.measuredHeights.length > 0
         ? reductions(this.measuredHeights, (acc, val) => { return acc+val; })
         : [];
+    this.measuredLoadSpinner = measureDomHeight(this.refs.loadingSpinner.getDOMNode());
 
     var loadedMoreChildren = this.state.computedView.numChildren !== prevState.computedView.numChildren;
     // Will need to check the height difference, not the num children, TODO.
@@ -267,7 +273,8 @@ var Infinite = React.createClass({
       // We have just measured the heights right above! The viewState measuredChildrenHeights is one tick behind, i think.
       var exactChildrenHeight = _last(this.measuredDistances);
       var prevExactChildrenHeight = this.state.computedView.measuredChildrenHeight;
-      var heightDifference = exactChildrenHeight - prevExactChildrenHeight;
+      var prevExactLoadSpinnerHeight = this.state.computedView.measuredLoadSpinner;
+      var heightDifference = exactChildrenHeight - (prevExactChildrenHeight + prevExactLoadSpinnerHeight);
 
       // Setting scrollTop can halt user scrolling (and disables hardware acceleration)
       // In firefox, the user scrolling actually is interrupted. Other browsers can keep up.
@@ -282,7 +289,9 @@ var Infinite = React.createClass({
 
   writeDiagnostics () {
     if (this.props.diagnosticsDomElId) {
-      var diagnosticsString = JSON.stringify(this.state, undefined, 2);
+      var diagnostics = _clone(this.state);
+      delete diagnostics.computedView.measuredDistances; // too large to display
+      var diagnosticsString = JSON.stringify(diagnostics, undefined, 2);
       var domEl = document.getElementById(this.props.diagnosticsDomElId);
       if (domEl) {
         domEl.textContent = diagnosticsString;
@@ -291,7 +300,9 @@ var Infinite = React.createClass({
   }
 });
 
-
+function measureDomHeight(domEl) {
+  return domEl.getClientRects()[0].height;
+}
 
 function measureChildHeights (domItems) {
   // clientHeight doesn't account for the border.
@@ -300,7 +311,7 @@ function measureChildHeights (domItems) {
   var xs = [];
   for (var i=0; i<domItems.length; ++i) {
     //var elHeight = domItems[i].clientHeight;
-    var elHeight = domItems[i].getClientRects()[0].height;
+    var elHeight = measureDomHeight(domItems[i]);
     xs.push(elHeight);
   }
   return xs;

@@ -41,7 +41,7 @@ gulp.task('build', function() {
       .pipe(gulp.dest('build'))
 
   if (example) {
-    gulp.src('./examples/*.jsx')
+    gulp.src('./examples/**/*.jsx')
       .pipe(jsx())
       .pipe(gulp.dest('examples'))
   }

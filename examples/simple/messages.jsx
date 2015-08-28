@@ -1,21 +1,4 @@
 
-function shortUid() {
-    // http://stackoverflow.com/a/6248722/20003
-    return ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).slice(-4)
-}
-
-function buildMessages (N) {
-    var ms = [];
-    for (var i = 0; i < N; ++i) {
-        var sentence = words({min: 3, max: 50}).join(" ");
-        var record = { text: sentence };
-        ms.push(record);
-    }
-    return ms;
-}
-
-
-// Backwards, scrolling up lazy loads old messges, and new messages can come in any time.
 var MessagesDemo = React.createClass({
     getInitialState: function() {
         return {

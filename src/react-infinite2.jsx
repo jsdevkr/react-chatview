@@ -3,7 +3,6 @@ var _cloneDeep = require('lodash.clonedeep');
 var _clone = require('lodash.clone');
 var _isEqual = require('lodash.isequal');
 var _last = require('lodash.last');
-var spliceArraySegmentAt = require('./utils/splice_array_segment_at');
 var reductions = require('./utils/reductions');
 var xor = require('./utils/xor');
 var ViewState = require('./ViewState');
@@ -78,15 +77,7 @@ var Infinite = React.createClass({
 
   componentWillMount () {},
 
-  componentWillUpdate (nextProps, nextState) {
-    if (this.state.computedView.apertureTop !== nextState.computedView.apertureTop) {
-      verifyVisibleRangeMonotonicallyIncreasing(
-          nextProps.flipped, this.state.computedView.apertureTop, nextState.computedView.apertureTop,
-          this.state.computedView, nextState.computedView
-      );
-    }
-  },
-
+  componentWillUpdate (nextProps, nextState) {},
 
   render () {
     var viewState = this.state.computedView;
@@ -142,7 +133,7 @@ var Infinite = React.createClass({
         props.containerHeight,
         this.measuredDistances,
         this.measuredLoadSpinner,
-        this.state.computedView.measuredScrollableHeight,
+        this.state.computedView.measuredChildrenHeight,
         React.Children.count(props.children),
         props.maxChildren,
         props.flipped);
@@ -155,7 +146,7 @@ var Infinite = React.createClass({
     var new_apertureTop = scrollTop;
     var new_visibleEnd_DistanceFromFront = !this.props.flipped
         ? new_apertureTop
-        : viewState.measuredScrollableHeight - new_apertureTop;
+        : viewState.measuredChildrenHeight - new_apertureTop;
 
     var whatIsThisNumber =
         viewState.measuredChildrenHeight -
@@ -248,15 +239,6 @@ var Infinite = React.createClass({
       updatedHeights.reverse();
     }
 
-    // in-place replacement of accumulated heights at this range with new measurements
-    //if (!_isEqual(this.measuredHeights.slice(this.state.computedView.visibleStart), updatedHeights)) {
-    //  spliceArraySegmentAt(this.measuredHeights, this.state.computedView.visibleStart, updatedHeights);
-    //  this.measuredDistances = this.measuredHeights.length > 0
-    //      ? reductions(this.measuredHeights, (acc, val) => { return acc+val; })
-    //      : [];
-    //}
-
-    // Simpler logic because we always draw all the children.
     this.measuredHeights = updatedHeights;
     this.measuredDistances = this.measuredHeights.length > 0
         ? reductions(this.measuredHeights, (acc, val) => { return acc+val; })
@@ -332,46 +314,6 @@ function buildScrollableStyle(apertureHeight) {
     overflowX: 'hidden',
     overflowY: 'scroll'
   };
-}
-
-
-function verifyVisibleRangeMonotonicallyIncreasing (flipped, scrollTop, nextScrollTop, viewState, nextViewState) {
-  var isViewStateSettled = viewState !== null;
-  // These diagnostics only hold true after things settle down in flipped mode.
-  if (isViewStateSettled) {
-    // scrollTop increased = scrolling absolute down
-    var scrollingDown = nextScrollTop <= scrollTop;
-    var scrollingUp = nextScrollTop >= scrollTop;
-
-    var regular = !flipped;
-
-    // regular: scrolling absolute down = forwards, up = backwards
-    // flipped: scrolling absolute down = backwards, up = forwards
-
-    var scrollingForwards = xor(regular, scrollingDown);
-    var scrollingBackwards = xor(regular, scrollingUp);
-
-    var scrollingForwards2 = xor(flipped, scrollingUp);
-    var scrollingBackwards2 = xor(flipped, scrollingDown);
-
-    console.assert(scrollingForwards == scrollingForwards2);
-    console.assert(scrollingBackwards == scrollingBackwards2);
-
-    // if scrolling forwards, visibleRange increased or stayed the same.
-    // if scrolling backwards, visibleRange decreased or stayed the same.
-
-    // visibleEnd can't be asserted because the algorithm might not put a consistent number of nodes in the dom.
-    // maybe this is the problem?
-    if (scrollingForwards) {
-      console.assert(nextViewState.visibleStart >= viewState.visibleStart);
-      //console.assert(nextViewState.visibleEnd >= viewState.visibleEnd);
-    }
-
-    if (scrollingBackwards) {
-      console.assert(nextViewState.visibleStart <= viewState.visibleStart);
-      //console.assert(nextViewState.visibleEnd <= viewState.visibleEnd);
-    }
-  }
 }
 
 

@@ -48,7 +48,7 @@
 <!-- Run gulp build -E to create this file. -->
 <script src="./chatdemo.js"></script>
 <script>
-    React.render(
+    window.app = React.render(
             React.createElement(Messages, null),
             document.getElementById('chatdemo'));
 </script>

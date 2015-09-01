@@ -3,6 +3,7 @@ coverage
 node_modules
 bower_components
 examples/**/*.js
+!examples/*.js
 .c9/
 build/
 .idea/

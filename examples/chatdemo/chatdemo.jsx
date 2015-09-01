@@ -10,14 +10,14 @@
 
     render: function () {
       var maybeImg = this.props.imageHref
-          ? <img src={this.props.imageHref} width="300" height="185" />
+          ? <img src={this.props.imageHref} height="185" />
           : null;
 
       return (
           <div className="infinite-list-item">
-            <p>{this.props.text}</p>
-            {maybeImg}
             <time>{this.props.time}</time>
+            <span>{this.props.text}</span>
+            <div>{maybeImg}</div>
           </div>
       );
     }
@@ -37,7 +37,8 @@
   function row (record, i) {
     if (record.type === 'chat') {
       return <ChatRow myself={record.myself}
-                      text={'' + i + ' ' + record.text}
+                      text={record.text}
+                      key={i}
                       time={record.time}
                       imageHref={record.imageHref}/>;
     }
@@ -72,14 +73,17 @@
                       className="chat"
                       maxChildren={15}
                       flipped={true}
-                      containerHeight={500}
-                      infiniteLoadBeginBottomOffset={200}
+                      containerHeight={400}
+                      infiniteLoadBeginBottomOffset={50}
                       onInfiniteLoad={this.handleInfiniteLoad}
                       loadingSpinnerDelegate={loadSpinner}
                       isInfiniteLoading={this.state.isInfiniteLoading}
+                      diagnosticsDomElId="diagnostics"
                 >
               {[typingIndicator].concat(rows)}
             </Infinite>
+            <pre className="diagnostics" id="diagnostics"></pre>
+            <div style={{clear: 'both'}}/>
           </div>
       );
     },
@@ -91,7 +95,7 @@
           isInfiniteLoading: false,
           messages: this.state.messages.concat(randomMessages(25))
         });
-      }.bind(this), 300);
+      }.bind(this), 1000);
     }
   });
 

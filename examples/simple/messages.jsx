@@ -23,8 +23,7 @@ var MessagesDemo = React.createClass({
 
     render: function() {
         var elements = this.state.messages.map(function (record, i) {
-            var style = { height: undefined };
-            return <div className="infinite-list-item" data-i={i} style={style}>{i} {record.text}</div>;
+            return <div className="infinite-list-item" data-i={i}>{i} {record.text}</div>;
         });
 
         var loadSpinner = <div className="infinite-list-item infinite-load-spinner">Loading...</div>;

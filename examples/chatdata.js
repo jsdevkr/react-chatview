@@ -13,19 +13,12 @@
   }
 
   function randomMessage () {
-    var messageType = randomChoice(['daydate', 'chat', 'chat', 'chat', 'chat', 'chat']);
-    if (messageType === 'chat') {
-      return {
-        type: 'chat',
-        myself: randInt(2) === 0,
-        time: '5:02pm',
-        text: randomSentence(),
-        imageHref: randInt(40) === 0 ? "/examples/putin-unicorn.jpg" : null
-      };
-    }
-    if (messageType === 'daydate') {
-      return {type: 'daydate', daydate: "Thursday, June 24"};
-    }
+    return {
+      myself: randInt(2) === 0,
+      time: '5:02pm',
+      text: randomSentence(),
+      imageHref: randInt(2) === 0 ? "/examples/stock-smiley-small.jpeg" : null
+    };
   }
 
   function randomMessages (N) {

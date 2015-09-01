@@ -10,7 +10,7 @@
 
     render: function () {
       var maybeImg = this.props.imageHref
-          ? <img src={this.props.imageHref} height="185" />
+          ? <img src={this.props.imageHref} style={{height:'auto'}}/>
           : null;
 
       return (
@@ -23,28 +23,12 @@
     }
   });
 
-  var DayDateSplitterRow = React.createClass({
-    render: function () {
-      return (
-          <div className="infinite-list-item">
-            <h4>{this.props.daydate}</h4>
-          </div>
-      );
-    }
-  });
-
-
   function row (record, i) {
-    if (record.type === 'chat') {
-      return <ChatRow myself={record.myself}
-                      text={record.text}
-                      key={i}
-                      time={record.time}
-                      imageHref={record.imageHref}/>;
-    }
-    if (record.type === 'daydate') {
-      return <DayDateSplitterRow daydate={record.daydate} />;
-    }
+    return <ChatRow myself={record.myself}
+                    text={record.text}
+                    key={i}
+                    time={record.time}
+                    imageHref={record.imageHref}/>;
   }
 
   var Messages = React.createClass({

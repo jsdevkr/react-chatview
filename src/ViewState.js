@@ -1,9 +1,8 @@
-var _isFinite = require('lodash.isFinite');
 var _last = require('lodash.last');
 
 
-function computeViewState (apertureTop, apertureHeight, measuredDistances, measuredLoadSpinner, prevMeasuredScrollableHeight,
-                           numChildren, maxChildrenPerScreen, flipped) {
+function computeViewState (apertureTop, apertureHeight, measuredDistances, measuredLoadSpinner,
+                           numChildren) {
 
   var anyHeightsMeasured = numChildren > 0;
   var measuredChildrenHeight = anyHeightsMeasured ? _last(measuredDistances) : null;

@@ -32,6 +32,8 @@ var Infinite = React.createClass({
     };
   },
 
+  componentWillMount () {},
+
   getInitialState () {
     this.measuredHeights = []; // actual heights of items measured from dom as we see them
     this.measuredDistances = []; // computed pixel distance of each item from the window top
@@ -42,28 +44,16 @@ var Infinite = React.createClass({
     this.rafRequestId = null; // for cleaning up outstanding requestAnimationFrames on WillUnmount
 
 
-    /**
-     * Always ignore flipped mode the first render.
-     * Flipped mode needs a dom measurement, but the modes are symmetrical so we can measure it from
-     * regular mode. The first "frame" will render regular mode, but the very next tick we will render
-     * in flipped mode.
-     * It's okay - we can't set the scrollbar pos to the bottom until after first render also.
-     * After first render, we set the scrollbar pos, which triggers a new render, which will
-     * properly render flipped.
-     */
-    var flipped = false;
     var scrollTop = 0; // regular mode initial scroll
-    var prevMeasuredScrollableHeight = null; // Required for flipped mode only.
+    // In flipped mode, we need to measure the scrollable height from the DOM to write to the scrollTop.
+    // Flipped and regular measured heights are symmetrical and don't depend on the scrollTop
 
     var viewState = ViewState.computeViewState(
         scrollTop,
         this.props.containerHeight,
         this.measuredDistances,
         this.measuredLoadSpinner,
-        prevMeasuredScrollableHeight,
-        React.Children.count(this.props.children),
-        this.props.maxChildren,
-        flipped);
+        React.Children.count(this.props.children));
 
     return {
       computedView: viewState,
@@ -73,8 +63,6 @@ var Infinite = React.createClass({
       isInfiniteLoading: false
     };
   },
-
-  componentWillMount () {},
 
   componentWillUpdate (nextProps, nextState) {},
 
@@ -127,10 +115,7 @@ var Infinite = React.createClass({
         props.containerHeight,
         this.measuredDistances,
         this.measuredLoadSpinner,
-        this.state.computedView.measuredChildrenHeight,
-        React.Children.count(props.children),
-        props.maxChildren,
-        props.flipped);
+        React.Children.count(props.children));
 
     this.setState({computedView: nextViewState, isFirstRender: false});
     return nextViewState;
@@ -210,7 +195,7 @@ var Infinite = React.createClass({
       // API is scrollTop, not scrollBottom, so account for apertureHeight
       var newScrollTop = scrollableDomEl.scrollHeight - this.props.containerHeight;
 
-      // this fires onScroll event, which will set the state.
+      // this fires onScroll event, which will reset the state and cause another render (reversed this time)
       scrollableDomEl.scrollTop = newScrollTop;
     }
 
@@ -223,9 +208,6 @@ var Infinite = React.createClass({
   },
 
   componentDidUpdate (prevProps, prevState) {
-    //console.assert(this.viewState.measuredChildrenHeight >= this.prevViewState.measuredChildrenHeight
-    //    || this.prevViewState.measuredChildrenHeight === undefined);
-
     // Measure item node heights again because they may have changed.
     var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item:not(.infinite-load-spinner)');
     var updatedHeights = measureChildHeights(domItems);

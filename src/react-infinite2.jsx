@@ -104,12 +104,32 @@ var Infinite = React.createClass({
       // DO NOT effect domEl.scrollTop. Do this when the new children hit dom in didUpdate
     }
 
+    /**
+     * If the scrollableHeight has changed, due to a layout reflow (an image loaded or content reized),
+     * we might need to touch up the scrollTop here to prevent a stutter.
+     *
+     * If the content resize was underneath scrollBottom, we don’t care - don’t do anything and nothing
+     * will stutter.
+     *
+     * If the content resize was above scrollBottom, we do care, fix up scrollTop to avoid a stutter.
+     *
+     * This code only accounts for the case where the page first loads and we're looking at the very first
+     * message, so all content is above scrollBottom and needs fixup. For example the image initial loads.
+     * This is fine since messages aren't going to randomly be resizing other than as they first come in
+     * at the bottom to generate previews and load images.
+     *
+     * It's possible to do better, but the code is complicated. See history of ViewState.js which
+     * had code to figure out visibleIndexStart and visibleIndexEnd, which is a start.
+     */
     var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item:not(.infinite-load-spinner)');
     var exactChildrenHeight = _sum(measureChildHeights(domItems));
     if (this.props.flipped && exactChildrenHeight !== this.state.computedView.measuredItemsHeight) {
       var prevExactChildrenHeight = this.state.computedView.measuredItemsHeight;
       var prevExactLoadSpinnerHeight = this.state.computedView.measuredLoadSpinner;
       var heightDifference = exactChildrenHeight - (prevExactChildrenHeight + prevExactLoadSpinnerHeight);
+
+      // Allowed to effect scrollTop here since the user is very unlikely to be scrolling when a reflow happens.
+      // reflows happen after events like an infinite load or initial load, when user can’t be scrolling.
       this.getDOMNode().scrollTop += heightDifference;
     }
 

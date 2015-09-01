@@ -3,7 +3,7 @@ var _cloneDeep = require('lodash.clonedeep');
 var _clone = require('lodash.clone');
 var _isEqual = require('lodash.isequal');
 var _last = require('lodash.last');
-var reductions = require('./utils/reductions');
+var _sum = require('lodash.sum');
 var ViewState = require('./ViewState');
 
 var Infinite = React.createClass({
@@ -35,8 +35,7 @@ var Infinite = React.createClass({
   componentWillMount () {},
 
   getInitialState () {
-    this.measuredHeights = []; // actual heights of items measured from dom as we see them
-    this.measuredDistances = []; // computed pixel distance of each item from the window top
+    this.measuredItemsHeight = null;
     this.measuredLoadSpinner = 0; // if we have a load spinner, this is the last measured height
     // Stored out-of-band of react state because we don't want to trigger component updates when
     // we measure it in a lifecycle method. They are duplicated into react state (part of the viewState)
@@ -51,7 +50,7 @@ var Infinite = React.createClass({
     var viewState = ViewState.computeViewState(
         scrollTop,
         this.props.containerHeight,
-        this.measuredDistances,
+        this.measuredItemsHeight,
         this.measuredLoadSpinner,
         React.Children.count(this.props.children));
 
@@ -104,6 +103,16 @@ var Infinite = React.createClass({
       }
       // DO NOT effect domEl.scrollTop. Do this when the new children hit dom in didUpdate
     }
+
+    var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item:not(.infinite-load-spinner)');
+    var exactChildrenHeight = _sum(measureChildHeights(domItems));
+    if (this.props.flipped && exactChildrenHeight !== this.state.computedView.measuredItemsHeight) {
+      var prevExactChildrenHeight = this.state.computedView.measuredItemsHeight;
+      var prevExactLoadSpinnerHeight = this.state.computedView.measuredLoadSpinner;
+      var heightDifference = exactChildrenHeight - (prevExactChildrenHeight + prevExactLoadSpinnerHeight);
+      this.getDOMNode().scrollTop += heightDifference;
+    }
+
     this.rafRequestId = window.requestAnimationFrame(this.pollScroll);
   },
 
@@ -113,7 +122,7 @@ var Infinite = React.createClass({
     var nextViewState = ViewState.computeViewState(
         scrollTop,
         props.containerHeight,
-        this.measuredDistances,
+        this.measuredItemsHeight,
         this.measuredLoadSpinner,
         React.Children.count(props.children));
 
@@ -125,10 +134,10 @@ var Infinite = React.createClass({
     var new_apertureTop = scrollTop;
     var new_visibleEnd_DistanceFromFront = !this.props.flipped
         ? new_apertureTop
-        : viewState.measuredChildrenHeight - new_apertureTop;
+        : viewState.measuredItemsHeight - new_apertureTop;
 
     var whatIsThisNumber =
-        viewState.measuredChildrenHeight -
+        viewState.measuredItemsHeight -
         viewState.apertureHeight -
         this.props.infiniteLoadBeginBottomOffset;
     var triggerLoad = (new_visibleEnd_DistanceFromFront > whatIsThisNumber);
@@ -183,10 +192,7 @@ var Infinite = React.createClass({
     // Do not store this in React state, because the view doesn't depend on them
     // and we don't want to cause a re-render.
     var domItems = this.getDOMNode().querySelectorAll('.infinite-list-item:not(.infinite-load-spinner)');
-    this.measuredHeights = measureChildHeights(domItems);
-    this.measuredDistances = this.measuredHeights.length > 0
-        ? reductions(this.measuredHeights, (acc, val) => { return acc+val; })
-        : [];
+    this.measuredItemsHeight = _sum(measureChildHeights(domItems));
 
     if (this.props.flipped) {
       // Set scrollbar position to all the way at bottom.
@@ -215,10 +221,7 @@ var Infinite = React.createClass({
       updatedHeights.reverse();
     }
 
-    this.measuredHeights = updatedHeights;
-    this.measuredDistances = this.measuredHeights.length > 0
-        ? reductions(this.measuredHeights, (acc, val) => { return acc+val; })
-        : [];
+    this.measuredItemsHeight = _sum(updatedHeights);
     this.measuredLoadSpinner = measureDomHeight(this.refs.loadingSpinner.getDOMNode());
 
     var loadedMoreChildren = this.state.computedView.numChildren !== prevState.computedView.numChildren;
@@ -229,8 +232,8 @@ var Infinite = React.createClass({
 
     if (loadedMoreChildren && this.props.flipped) {
       // We have just measured the heights right above! The viewState measuredChildrenHeights is one tick behind, i think.
-      var exactChildrenHeight = _last(this.measuredDistances);
-      var prevExactChildrenHeight = this.state.computedView.measuredChildrenHeight;
+      var exactChildrenHeight = this.measuredItemsHeight;
+      var prevExactChildrenHeight = this.state.computedView.measuredItemsHeight;
       var prevExactLoadSpinnerHeight = this.state.computedView.measuredLoadSpinner;
       var heightDifference = exactChildrenHeight - (prevExactChildrenHeight + prevExactLoadSpinnerHeight);
 
@@ -247,9 +250,7 @@ var Infinite = React.createClass({
 
   writeDiagnostics () {
     if (this.props.diagnosticsDomElId) {
-      var diagnostics = _cloneDeep(this.state);
-      delete diagnostics.computedView.measuredDistances; // too large to display
-      var diagnosticsString = JSON.stringify(diagnostics, undefined, 2);
+      var diagnosticsString = JSON.stringify(this.state, undefined, 2);
       var domEl = document.getElementById(this.props.diagnosticsDomElId);
       if (domEl) {
         domEl.textContent = diagnosticsString;

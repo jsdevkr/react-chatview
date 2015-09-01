@@ -1,21 +1,14 @@
 var _last = require('lodash.last');
 
 
-function computeViewState (apertureTop, apertureHeight, measuredDistances, measuredLoadSpinner,
+function computeViewState (apertureTop, apertureHeight, measuredItemsHeight, measuredLoadSpinner,
                            numChildren) {
-
-  var anyHeightsMeasured = numChildren > 0;
-  var measuredChildrenHeight = anyHeightsMeasured ? _last(measuredDistances) : null;
 
   return {
     apertureHeight: apertureHeight,
     apertureTop: apertureTop,
-
-    measuredChildrenHeight: measuredChildrenHeight,
-
+    measuredItemsHeight: measuredItemsHeight,
     numChildren: numChildren,
-
-    measuredDistances: measuredDistances,
     measuredLoadSpinner: measuredLoadSpinner
   };
 }

@@ -1,8 +1,8 @@
 var React = global.React || require('react');
+var _cloneDeep = require('lodash.clonedeep');
 var _clone = require('lodash.clone');
 var _isEqual = require('lodash.isequal');
 var _last = require('lodash.last');
-var _omit = require('lodash.omit');
 var spliceArraySegmentAt = require('./utils/splice_array_segment_at');
 var reductions = require('./utils/reductions');
 var xor = require('./utils/xor');
@@ -289,7 +289,7 @@ var Infinite = React.createClass({
 
   writeDiagnostics () {
     if (this.props.diagnosticsDomElId) {
-      var diagnostics = _clone(this.state);
+      var diagnostics = _cloneDeep(this.state);
       delete diagnostics.computedView.measuredDistances; // too large to display
       var diagnosticsString = JSON.stringify(diagnostics, undefined, 2);
       var domEl = document.getElementById(this.props.diagnosticsDomElId);

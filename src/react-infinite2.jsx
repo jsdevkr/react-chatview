@@ -4,7 +4,6 @@ var _clone = require('lodash.clone');
 var _isEqual = require('lodash.isequal');
 var _last = require('lodash.last');
 var reductions = require('./utils/reductions');
-var xor = require('./utils/xor');
 var ViewState = require('./ViewState');
 
 var Infinite = React.createClass({
@@ -81,7 +80,7 @@ var Infinite = React.createClass({
 
   render () {
     var viewState = this.state.computedView;
-    var displayables = _clone(this.props.children); //this.props.children.slice(viewState.visibleStart, viewState.visibleEnd);
+    var displayables = _clone(this.props.children);
     if (this.props.flipped) {
       displayables.reverse();
     }
@@ -90,9 +89,6 @@ var Infinite = React.createClass({
       {this.state.isInfiniteLoading ? this.props.loadingSpinnerDelegate : null}
     </div>;
 
-    var topSpace = 0; //!this.props.flipped ? viewState.frontSpace : viewState.backSpace;
-    var bottomSpace = 0; //!this.props.flipped ? viewState.backSpace : viewState.frontSpace;
-
     // Must not hook onScroll event directly - that will break hardware accelerated scrolling.
     // We poll it with requestAnimationFrame instead.
     return (
@@ -100,9 +96,7 @@ var Infinite = React.createClass({
            style={buildScrollableStyle(viewState.apertureHeight)}>
         <div ref="smoothScrollingWrapper" style={this.state.isScrolling ? { pointerEvents: 'none' } : {}}>
           {this.props.flipped ? loadSpinner : null}
-          <div ref="topSpacer" style={buildHeightStyle(topSpace)}/>
           {displayables}
-          <div ref="bottomSpacer" style={buildHeightStyle(bottomSpace)}/>
           {this.props.flipped ? null : loadSpinner}
         </div>
       </div>

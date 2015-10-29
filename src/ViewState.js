@@ -1,15 +1,20 @@
 var _last = require('lodash.last');
 
 
-function computeViewState (apertureTop, apertureHeight, measuredItemsHeight, measuredLoadSpinner,
-                           numChildren) {
+function computeViewState (scrollTop, maskHeight, measuredItemsHeight, measuredLoadSpinner,
+                           numChildren, clientHeight, scrollHeight) {
+
+  //console.assert(scrollHeight === measuredItemsHeight, scrollHeight + ' ' + measuredItemsHeight);
 
   return {
-    apertureHeight: apertureHeight,
-    apertureTop: apertureTop,
-    measuredItemsHeight: measuredItemsHeight,
+    maskHeight: maskHeight,
+    scrollTop: scrollTop,
+    clientHeight: clientHeight,
+    scrollHeight: scrollHeight,
     numChildren: numChildren,
-    measuredLoadSpinner: measuredLoadSpinner
+    measuredLoadSpinner: measuredLoadSpinner,
+
+    measuredItemsHeight: measuredItemsHeight // same as scrollHeight
   };
 }
 

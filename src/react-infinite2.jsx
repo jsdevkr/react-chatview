@@ -11,9 +11,8 @@ var Infinite = React.createClass({
   propTypes: {
     containerHeight: React.PropTypes.number.isRequired, // total height of the visible window.
     flipped: React.PropTypes.bool,
-    handleScroll: React.PropTypes.func, // What is this for? Not used in examples.
     timeScrollStateLastsForAfterUserScrolls: React.PropTypes.number,
-    infiniteLoadBeginBottomOffset: React.PropTypes.number,
+    scrollLoadThreshold: React.PropTypes.number,
     onInfiniteLoad: React.PropTypes.func,
 
     diagnosticsDomElId: React.PropTypes.string,
@@ -24,13 +23,10 @@ var Infinite = React.createClass({
     return {
       flipped: false,
       loadingSpinnerDelegate: <div/>,
-      handleScroll: () => {},
       timeScrollStateLastsForAfterUserScrolls: 150,
       className: ''
     };
   },
-
-  componentWillMount () {},
 
   getInitialState () {
     this.measuredItemsHeight = null;
@@ -78,7 +74,7 @@ var Infinite = React.createClass({
     // We poll it with requestAnimationFrame instead.
     return (
       <div className={this.props.className} ref="scrollable"
-           style={buildScrollableStyle(viewState.apertureHeight)}>
+           style={buildScrollableStyle(viewState.maskHeight)}>
         <div ref="smoothScrollingWrapper" style={this.state.isScrolling ? { pointerEvents: 'none' } : {}}>
           {this.props.flipped ? loadSpinner : null}
           {displayables}
@@ -91,11 +87,11 @@ var Infinite = React.createClass({
   pollScroll () {
     // We are allowed to recompute the viewState here, but we are not
     // allowed to write to scrollTop here, which can abruptly halt in-progress user scrolling.
-    var scrollTop = this.refs.scrollable.getDOMNode().scrollTop;
-    if (scrollTop !== this.state.computedView.apertureTop) {
+    var domNode = this.getDOMNode();
+    if (domNode.scrollTop !== this.state.computedView.scrollTop) {
       this.manageScrollTimeouts();
-      var nextViewState = this.setViewState(this.props, scrollTop);
-      if (this.shouldTriggerLoad(scrollTop, nextViewState)) {
+      var nextViewState = this.setViewState(this.props, domNode);
+      if (this.shouldTriggerLoad(nextViewState)) {
         this.setState({ isInfiniteLoading: true });
         var p = this.props.onInfiniteLoad();
         p.then(() => this.setState({ isInfiniteLoading: false }));
@@ -135,32 +131,36 @@ var Infinite = React.createClass({
     this.rafRequestId = window.requestAnimationFrame(this.pollScroll);
   },
 
-  setViewState (props, scrollTop) {
+  setViewState (props, domNode) {
     // Can't inspect props directly, sometimes we're dealing with a future view state from
     // componentWillReceiveNewProps. That method can't setState, so we can safely inspect this.state.
     var nextViewState = ViewState.computeViewState(
-        scrollTop,
+        domNode.scrollTop,
         props.containerHeight,
         this.measuredItemsHeight,
         this.measuredLoadSpinner,
-        React.Children.count(props.children));
+        React.Children.count(props.children),
+        domNode.clientHeight,
+        domNode.scrollHeight);
 
     this.setState({computedView: nextViewState, isFirstRender: false});
     return nextViewState;
   },
 
-  shouldTriggerLoad (scrollTop, viewState) {
-    var new_visibleEnd_DistanceFromFront = !this.props.flipped
-        ? scrollTop
-        : viewState.measuredItemsHeight - scrollTop;
+  isPassedThreshold (flipped, scrollLoadThreshold, scrollTop, scrollHeight, clientHeight) {
+    return flipped
+        ? scrollTop <= scrollLoadThreshold
+        : scrollTop >= (scrollHeight - clientHeight - scrollLoadThreshold);
+  },
 
-    var whatIsThisNumber =
-        viewState.measuredItemsHeight -
-        viewState.apertureHeight -
-        this.props.infiniteLoadBeginBottomOffset;
-    var triggerLoad = (new_visibleEnd_DistanceFromFront > whatIsThisNumber);
-
-    return triggerLoad && !this.state.isInfiniteLoading;
+  shouldTriggerLoad (viewState) {
+    var passedThreshold = this.isPassedThreshold(
+        this.props.flipped,
+        this.props.scrollLoadThreshold,
+        viewState.scrollTop,
+        viewState.scrollHeight,
+        viewState.clientHeight);
+    return passedThreshold && !this.state.isInfiniteLoading;
   },
 
   manageScrollTimeouts() {
@@ -185,11 +185,12 @@ var Infinite = React.createClass({
     });
   },
 
+  // todo delete
   componentWillReceiveProps (nextProps) {
     const didLoadOccur = React.Children.count(this.props.children) !== React.Children.count(nextProps.children);
     if (didLoadOccur) {
       // https://github.com/facebook/react/issues/2659
-      this.setViewState(nextProps, this.getDOMNode().scrollTop);
+      this.setViewState(nextProps, this.getDOMNode());
       // The new children are about to be rendered. We haven't measured them yet. Somehow we need to adjust the
       // scrollTop to account for any new children that loaded above us. Render them now without adjusting scrollTop.
       // Then, browser will reflow, then we can measure the scrollTop in didUpdate and fix it up,
@@ -293,9 +294,9 @@ function buildHeightStyle (height) {
 }
 
 
-function buildScrollableStyle(apertureHeight) {
+function buildScrollableStyle(maskHeight) {
   return {
-    height: apertureHeight,
+    height: maskHeight, //todo remove
     overflowX: 'hidden',
     overflowY: 'scroll'
   };

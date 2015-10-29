@@ -9,8 +9,6 @@ var ViewState = require('./ViewState');
 var Infinite = React.createClass({
 
   propTypes: {
-
-    maxChildren: React.PropTypes.number.isRequired, // max # visible items (e.g. # of blank items that fit)
     containerHeight: React.PropTypes.number.isRequired, // total height of the visible window.
     flipped: React.PropTypes.bool,
     handleScroll: React.PropTypes.func, // What is this for? Not used in examples.
@@ -98,8 +96,9 @@ var Infinite = React.createClass({
       this.manageScrollTimeouts();
       var nextViewState = this.setViewState(this.props, scrollTop);
       if (this.shouldTriggerLoad(scrollTop, nextViewState)) {
-        this.props.onInfiniteLoad();
         this.setState({ isInfiniteLoading: true });
+        var p = this.props.onInfiniteLoad();
+        p.then(() => this.setState({ isInfiniteLoading: false }));
       }
       // DO NOT effect domEl.scrollTop. Do this when the new children hit dom in didUpdate
     }
@@ -151,10 +150,9 @@ var Infinite = React.createClass({
   },
 
   shouldTriggerLoad (scrollTop, viewState) {
-    var new_apertureTop = scrollTop;
     var new_visibleEnd_DistanceFromFront = !this.props.flipped
-        ? new_apertureTop
-        : viewState.measuredItemsHeight - new_apertureTop;
+        ? scrollTop
+        : viewState.measuredItemsHeight - scrollTop;
 
     var whatIsThisNumber =
         viewState.measuredItemsHeight -
@@ -188,11 +186,8 @@ var Infinite = React.createClass({
   },
 
   componentWillReceiveProps (nextProps) {
-    var isInfiniteLoading = nextProps.isInfiniteLoading !== undefined
-        ? nextProps.isInfiniteLoading
-        : this.state.isInfiniteLoading;
-
-    if (React.Children.count(this.props.children) !== React.Children.count(nextProps.children)) {
+    const didLoadOccur = React.Children.count(this.props.children) !== React.Children.count(nextProps.children);
+    if (didLoadOccur) {
       // https://github.com/facebook/react/issues/2659
       this.setViewState(nextProps, this.getDOMNode().scrollTop);
       // The new children are about to be rendered. We haven't measured them yet. Somehow we need to adjust the
@@ -200,10 +195,6 @@ var Infinite = React.createClass({
       // Then, browser will reflow, then we can measure the scrollTop in didUpdate and fix it up,
       // this happens before repaint.  https://github.com/facebook/react/issues/2659
     }
-
-    this.setState({
-      isInfiniteLoading: isInfiniteLoading
-    })
   },
 
   componentDidMount () {
@@ -218,11 +209,8 @@ var Infinite = React.createClass({
       // Set scrollbar position to all the way at bottom.
       var scrollableDomEl = this.refs.scrollable.getDOMNode();
 
-      // API is scrollTop, not scrollBottom, so account for apertureHeight
-      var newScrollTop = scrollableDomEl.scrollHeight - this.props.containerHeight;
-
       // this fires onScroll event, which will reset the state and cause another render (reversed this time)
-      scrollableDomEl.scrollTop = newScrollTop;
+      scrollableDomEl.scrollTop = scrollableDomEl.scrollHeight - this.props.containerHeight;
     }
 
     this.writeDiagnostics();

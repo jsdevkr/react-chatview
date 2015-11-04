@@ -29,12 +29,11 @@ var Infinite = React.createClass({
   getInitialState () {
     this.rafRequestId = null; // for cleaning up outstanding requestAnimationFrames on WillUnmount
 
-    var scrollTop = 0; // regular mode initial scroll
+    this.scrollTop = 0; // regular mode initial scroll
     // In flipped mode, we need to measure the scrollable height from the DOM to write to the scrollTop.
     // Flipped and regular measured heights are symmetrical and don't depend on the scrollTop
 
     return {
-      scrollTop: scrollTop,
       scrollHeight: undefined, // it's okay, this won't be read until the second render we think
       isInfiniteLoading: false
     };
@@ -70,12 +69,12 @@ var Infinite = React.createClass({
   // may have changed.
   pollScroll () {
     var domNode = this.getDOMNode();
-    if (domNode.scrollTop !== this.state.scrollTop) {
-      this.setViewState(this.props, domNode);
+    if (domNode.scrollTop !== this.scrollTop) {
+      this.setViewState(domNode, this.state.isInfiniteLoading);
       if (this.shouldTriggerLoad(domNode)) {
-        this.setState({ isInfiniteLoading: true });
+        this.setViewState(domNode, true);
         var p = this.props.onInfiniteLoad();
-        p.then(() => this.setState({ isInfiniteLoading: false }));
+        p.then(() => this.setViewState(domNode, false));
       }
       // the dom is ahead of the state
       this.updateScrollTop(this.state.scrollHeight, 'pollScroll');
@@ -83,10 +82,10 @@ var Infinite = React.createClass({
     this.rafRequestId = window.requestAnimationFrame(this.pollScroll);
   },
 
-  setViewState (props, domNode) {
+  setViewState (domNode, isInfiniteLoading) {
     this.setState({
-      scrollTop: domNode.scrollTop,
-      scrollHeight: domNode.scrollHeight
+      scrollHeight: domNode.scrollHeight,
+      isInfiniteLoading: isInfiniteLoading
     });
   },
 
@@ -116,6 +115,7 @@ var Infinite = React.createClass({
         : 0;
 
     scrollableDomEl.scrollTop = heightDifference;
+    this.scrollTop = heightDifference;
 
     this.writeDiagnostics();
     this.rafRequestId = window.requestAnimationFrame(this.pollScroll);
@@ -139,6 +139,8 @@ var Infinite = React.createClass({
     scrollableDomEl.scrollTop += this.props.flipped
         ? scrollableDomEl.scrollHeight - (prevScrollHeight || 0)
         : 0;
+
+    this.scrollTop = scrollableDomEl.scrollTop;
 
     // Setting scrollTop can halt user scrolling (and disables hardware acceleration)
 

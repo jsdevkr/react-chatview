@@ -191,7 +191,7 @@ var Infinite = React.createClass({
 
     //todo this is only the happy path
     scrollableDomEl.scrollTop += this.props.flipped
-        ? scrollableDomEl.scrollHeight - prevComputedView.scrollHeight
+        ? scrollableDomEl.scrollHeight - (prevComputedView.scrollHeight || 0)
         : 0;
 
     // Setting scrollTop can halt user scrolling (and disables hardware acceleration)

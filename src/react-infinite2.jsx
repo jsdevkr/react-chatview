@@ -33,8 +33,9 @@ var Infinite = React.createClass({
     // In flipped mode, we need to measure the scrollable height from the DOM to write to the scrollTop.
     // Flipped and regular measured heights are symmetrical and don't depend on the scrollTop
 
+    this.scrollHeight = undefined; // it's okay, this won't be read until the second render we think
+
     return {
-      scrollHeight: undefined, // it's okay, this won't be read until the second render we think
       isInfiniteLoading: false
     };
   },
@@ -70,23 +71,15 @@ var Infinite = React.createClass({
   pollScroll () {
     var domNode = this.getDOMNode();
     if (domNode.scrollTop !== this.scrollTop) {
-      this.setViewState(domNode, this.state.isInfiniteLoading);
       if (this.shouldTriggerLoad(domNode)) {
-        this.setViewState(domNode, true);
+        this.setState({ isInfiniteLoading: true });
         var p = this.props.onInfiniteLoad();
-        p.then(() => this.setViewState(domNode, false));
+        p.then(() => this.setState({ isInfiniteLoading: false }));
       }
       // the dom is ahead of the state
-      this.updateScrollTop(this.state.scrollHeight, 'pollScroll');
+      this.updateScrollTop();
     }
     this.rafRequestId = window.requestAnimationFrame(this.pollScroll);
-  },
-
-  setViewState (domNode, isInfiniteLoading) {
-    this.setState({
-      scrollHeight: domNode.scrollHeight,
-      isInfiniteLoading: isInfiniteLoading
-    });
   },
 
   isPassedThreshold (flipped, scrollLoadThreshold, scrollTop, scrollHeight, clientHeight) {
@@ -126,21 +119,24 @@ var Infinite = React.createClass({
   },
 
   componentDidUpdate (prevProps, prevState) {
-    this.updateScrollTop(prevState.scrollHeight, 'componentDidUpdate');
+    this.updateScrollTop();
     this.writeDiagnostics();
   },
 
-  updateScrollTop(prevScrollHeight, debug) {
+  updateScrollTop() {
     var scrollableDomEl = this.getDOMNode();
 
-    console.log(debug, scrollableDomEl.scrollTop, scrollableDomEl.scrollHeight, prevScrollHeight);
-
     //todo this is only the happy path
-    scrollableDomEl.scrollTop += this.props.flipped
-        ? scrollableDomEl.scrollHeight - (prevScrollHeight || 0)
-        : 0;
+    var newScrollTop = scrollableDomEl.scrollTop + (this.props.flipped
+        ? scrollableDomEl.scrollHeight - (this.scrollHeight || 0)
+        : 0);
+
+    if (newScrollTop !== scrollableDomEl.scrollTop) {
+      scrollableDomEl.scrollTop = newScrollTop;
+    }
 
     this.scrollTop = scrollableDomEl.scrollTop;
+    this.scrollHeight = scrollableDomEl.scrollHeight;
 
     // Setting scrollTop can halt user scrolling (and disables hardware acceleration)
 

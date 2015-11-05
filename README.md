@@ -9,6 +9,7 @@ This is an alpha release, use at your own risk!
 Warnings
  * examples don't work yet
  * no tests yet
+ * there are issues with the build
 
 
 Features

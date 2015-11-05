@@ -18,15 +18,15 @@ var args = require('yargs').alias('P', 'production')
 gulp.task('build', function() {
   // Build standalone bundle for the browser
   var b = browserify({
-        entries: './src/react-infinite2.jsx',
-        standalone: 'Infinite'
+        entries: './src/react-feed.js',
+        standalone: 'Feed'
       })
       .transform(reactify, {
         es6: true
       })
      .exclude('react')
      .bundle()
-     .pipe(sourcestream('react-infinite.' + (production ? 'min.' : '') + 'js'))
+     .pipe(sourcestream('react-feed.' + (production ? 'min.' : '') + 'js'))
      .pipe(buffer())
      .pipe(given(development, sourcemaps.init()))
      .pipe(given(production, minifyjs()))
@@ -34,7 +34,7 @@ gulp.task('build', function() {
      .pipe(gulp.dest('dist'));
 
   // Transpile CommonJS files to ES5 with React's tools.
-  gulp.src(['./src/**/*.js', './src/**/*.jsx'])
+  gulp.src(['./src/**/*.js'])
       .pipe(jsx({
         harmony: true
       }))

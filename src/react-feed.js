@@ -1,11 +1,7 @@
 var React = global.React || require('react');
-var _cloneDeep = require('lodash.clonedeep');
-var _clone = require('lodash.clone');
-var _isEqual = require('lodash.isequal');
-var _last = require('lodash.last');
-var _sum = require('lodash.sum');
+var clone = require('lodash.clone');
 
-var Infinite = React.createClass({
+var Feed = React.createClass({
 
   propTypes: {
     flipped: React.PropTypes.bool,
@@ -43,7 +39,7 @@ var Infinite = React.createClass({
   componentWillUpdate (nextProps, nextState) {},
 
   render () {
-    var displayables = _clone(this.props.children);
+    var displayables = clone(this.props.children);
     if (this.props.flipped) {
       displayables.reverse();
     }
@@ -157,5 +153,5 @@ var Infinite = React.createClass({
 });
 
 
-module.exports = Infinite;
-global.Infinite = Infinite;
+module.exports = Feed;
+global.Feed = Feed;

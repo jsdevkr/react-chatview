@@ -1,6 +1,6 @@
 {
   "name": "react-feed",
-  "version": "0.0.1-alpha.4",
+  "version": "0.0.1-alpha.5",
   "description": "Infinite scroll chat or feed component for React.js",
   "main": "src/react-feed.js",
   "repository": {

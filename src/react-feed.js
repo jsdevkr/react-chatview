@@ -5,31 +5,27 @@ var Feed = React.createClass({
 
   propTypes: {
     flipped: React.PropTypes.bool,
-    timeScrollStateLastsForAfterUserScrolls: React.PropTypes.number,
-    scrollLoadThreshold: React.PropTypes.number, // todo should be a percent
-    onInfiniteLoad: React.PropTypes.func,
-
-    diagnosticsDomElId: React.PropTypes.string,
+    scrollLoadThreshold: React.PropTypes.number,
+    onInfiniteLoad: React.PropTypes.func.isRequired,
+    loadingSpinnerDelegate: React.PropTypes.element,
     className: React.PropTypes.string
   },
 
   getDefaultProps () {
     return {
       flipped: false,
+      scrollLoadThreshold: 10,
       loadingSpinnerDelegate: <div/>,
-      timeScrollStateLastsForAfterUserScrolls: 150,
       className: ''
     };
   },
 
   getInitialState () {
     this.rafRequestId = null; // for cleaning up outstanding requestAnimationFrames on WillUnmount
-
     this.scrollTop = 0; // regular mode initial scroll
+    this.scrollHeight = undefined; // it's okay, this won't be read until the second render.
     // In flipped mode, we need to measure the scrollable height from the DOM to write to the scrollTop.
     // Flipped and regular measured heights are symmetrical and don't depend on the scrollTop
-
-    this.scrollHeight = undefined; // it's okay, this won't be read until the second render we think
 
     return {
       isInfiniteLoading: false
@@ -105,8 +101,6 @@ var Feed = React.createClass({
 
     scrollableDomEl.scrollTop = heightDifference;
     this.scrollTop = heightDifference;
-
-    this.writeDiagnostics();
     this.rafRequestId = window.requestAnimationFrame(this.pollScroll);
   },
 
@@ -116,7 +110,6 @@ var Feed = React.createClass({
 
   componentDidUpdate (prevProps, prevState) {
     this.updateScrollTop();
-    this.writeDiagnostics();
   },
 
   updateScrollTop() {
@@ -139,16 +132,6 @@ var Feed = React.createClass({
     // Both cases - flipped and refular - have cases where the content expands in the proper direction,
     // or the content expands in the wrong direciton. Either history or new message in both cases.
     // We are only handling half of the cases. Or an image resized above or below us.
-  },
-
-  writeDiagnostics () {
-    if (this.props.diagnosticsDomElId) {
-      var diagnosticsString = JSON.stringify(this.state, undefined, 2);
-      var domEl = document.getElementById(this.props.diagnosticsDomElId);
-      if (domEl) {
-        domEl.textContent = diagnosticsString;
-      }
-    }
   }
 });
 

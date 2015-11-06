@@ -1,5 +1,5 @@
-react-feed
-==========
+react-chatview
+==============
 
 > Infinite scroll chat or feed component for React.js
 
@@ -7,8 +7,9 @@ This is an alpha release, use at your own risk!
 
 
 Warnings
- * examples don't work yet
- * no tests yet
+ * no documentation, you'll have to read the source
+ * broken examples
+ * no tests
  * there are issues with the build
 
 
@@ -21,17 +22,16 @@ Features
 
 Mis-features
  * Not actually infinite - currently all elements that have been loaded remain the dom (this can probably be fixed)
- * Not optimized for mobile
 
 
-Things that don't work yet
+Things that don't work yet, but soon
  * configurable loading spinner
  * auto-scroll to newest message when appropriate (pinning)
  * use webpack
  * fix and improve demos
 
 
-Things that are possible to make work but we haven't invested time into yet
+Things that are possible, but not a priority
  * auto-correct scroll jitter when content resizes or is added above/below the focus point
  * optimize for mobile
 
@@ -41,3 +41,6 @@ Things we aren't sure about
 
 
 There are probably more features missing. Please open an issue!
+
+
+This work originated as a fork and modifications of [seatgeek/react-infinite](https://github.com/seatgeek/react-infinite), and was subsequently rewritten several times.

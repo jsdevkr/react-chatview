@@ -1,14 +1,14 @@
 {
-  "name": "react-feed",
-  "version": "0.0.1-alpha.5",
+  "name": "react-chatview",
+  "version": "0.0.1-alpha.6",
   "description": "Infinite scroll chat or feed component for React.js",
-  "main": "src/react-feed.js",
+  "main": "src/react-chatview.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dustingetz/react-feed"
+    "url": "https://github.com/dustingetz/react-chatview"
   },
-  "keywords": ["react", "scroll", "infinite"],
-  "browser": "src/react-feed.js",
+  "keywords": ["react", "chat", "scroll", "infinite"],
+  "browser": "src/react-chatview.js",
   "scripts": {
     "build": "gulp build && gulp build -E"
   },

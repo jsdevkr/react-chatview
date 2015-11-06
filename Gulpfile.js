@@ -18,7 +18,7 @@ var args = require('yargs').alias('P', 'production')
 gulp.task('build', function() {
   // Build standalone bundle for the browser
   var b = browserify({
-        entries: './src/react-feed.js',
+        entries: './src/react-chatview.js',
         standalone: 'Feed'
       })
       .transform(reactify, {
@@ -26,7 +26,7 @@ gulp.task('build', function() {
       })
      .exclude('react')
      .bundle()
-     .pipe(sourcestream('react-feed.' + (production ? 'min.' : '') + 'js'))
+     .pipe(sourcestream('react-chatview.' + (production ? 'min.' : '') + 'js'))
      .pipe(buffer())
      .pipe(given(development, sourcemaps.init()))
      .pipe(given(production, minifyjs()))

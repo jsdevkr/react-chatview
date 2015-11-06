@@ -1,7 +1,7 @@
 var React = global.React || require('react');
 var clone = require('lodash.clone');
 
-var Feed = React.createClass({
+var ChatView = React.createClass({
 
   propTypes: {
     flipped: React.PropTypes.bool,
@@ -136,5 +136,5 @@ var Feed = React.createClass({
 });
 
 
-module.exports = Feed;
-global.Feed = Feed;
+module.exports = ChatView;
+global.ChatView = ChatView;

@@ -6,42 +6,35 @@ react-chatview
 This is an alpha release, use at your own risk!
 
 
-Warnings
+### Warnings
  * no documentation, you'll have to read the source
- * broken examples
  * no tests
  * there are issues with the build
 
 
-Live Demo
+### Live Demo
 [![Live Demo](screenshot.png?raw=true)](http://musician-peggy-71735.bitballoon.com/)
 
+Here is the [source code to the live demo](https://github.com/dustingetz/messages).
 
-Features
+
+### Features
  * works as newsfeed or chat (infinite load down, infinite load up)
  * hardware accelerated scrolling
  * arbitrary element contents, variable height
  * arbitrary height container, defers to browser for layout/resize
 
 
-Mis-features
- * Not actually infinite - currently all elements that have been loaded remain the dom (this can probably be fixed)
+### Mis-features
+ * Not actually infinite - currently all elements that have been loaded remain the dom
 
 
-Things that don't work yet, but soon
+### Things that don't work yet, but maybe soon
  * configurable loading spinner
  * auto-scroll to newest message when appropriate (pinning)
- * use webpack
- * fix and improve demos
-
-
-Things that are possible, but not a priority
  * auto-correct scroll jitter when content resizes or is added above/below the focus point
- * optimize for mobile
-
-
-Things we aren't sure about
- * support an actual infinite number of elemenets, like 10,000+
+ * use webpack
+ * optimize for mobile (but it works)
 
 
 There are probably more features missing. Please open an issue!

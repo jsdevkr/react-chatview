@@ -1,5 +1,6 @@
-var React = global.React || require('react');
-var clone = require('lodash.clone');
+import React from 'react';
+import ReactDOM from 'react-dom';
+import clone from 'lodash.clone';
 
 var ChatView = React.createClass({
 
@@ -61,7 +62,7 @@ var ChatView = React.createClass({
   // detect when dom has changed underneath us- either scrollTop or scrollHeight (layout reflow)
   // may have changed.
   pollScroll () {
-    var domNode = this.getDOMNode();
+    var domNode = ReactDOM.findDOMNode(this);
     if (domNode.scrollTop !== this.scrollTop) {
       if (this.shouldTriggerLoad(domNode)) {
         this.setState({ isInfiniteLoading: true });
@@ -91,7 +92,7 @@ var ChatView = React.createClass({
   },
 
   componentDidMount () {
-    var scrollableDomEl = this.getDOMNode();
+    var scrollableDomEl = ReactDOM.findDOMNode(this);
 
     // If there are not yet any children (they are still loading),
     // this is a no-op as we are at both the top and bottom of empty viewport
@@ -113,7 +114,7 @@ var ChatView = React.createClass({
   },
 
   updateScrollTop() {
-    var scrollableDomEl = this.getDOMNode();
+    var scrollableDomEl = ReactDOM.findDOMNode(this);
 
     //todo this is only the happy path
     var newScrollTop = scrollableDomEl.scrollTop + (this.props.flipped

@@ -13,6 +13,9 @@ Warnings
  * there are issues with the build
 
 
+[![Live Demo](screenshot.png?raw=true)](http://musician-peggy-71735.bitballoon.com/)
+
+
 Features
  * works as newsfeed or chat (infinite load down, infinite load up)
  * hardware accelerated scrolling

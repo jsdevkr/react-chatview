@@ -15,7 +15,7 @@ This is an alpha release, use at your own risk!
 ### Live Demo
 [![Live Demo](screenshot.png?raw=true)](http://musician-peggy-71735.bitballoon.com/)
 
-Here is the [source code to the live demo](https://github.com/dustingetz/messages).
+Here is the [live demo](http://musician-peggy-71735.bitballoon.com/), and [source code to the live demo](https://github.com/dustingetz/messages).
 
 
 ### Features

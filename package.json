@@ -1,8 +1,12 @@
 {
   "name": "react-chatview",
-  "version": "0.0.1-alpha.7",
+  "version": "0.0.1-alpha.8",
   "description": "Infinite scroll chat or feed component for React.js",
   "main": "src/react-chatview.js",
+  "scripts": {
+    "build": "webpack",
+    "dist": "webpack --config webpack.dist.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/dustingetz/react-chatview"
@@ -15,5 +19,10 @@
   "peerDependencies": {
     "react": ">= 0.14.0",
     "react-dom": ">= 0.14.0"
+  },
+  "devDependencies": {
+    "babel-core": "^5.8.22",
+    "babel-loader": "^5.3.2",
+    "webpack": "^1.11.0"
   }
 }

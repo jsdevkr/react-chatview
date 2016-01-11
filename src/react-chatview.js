@@ -138,4 +138,3 @@ var ChatView = React.createClass({
 
 
 module.exports = ChatView;
-global.ChatView = ChatView;

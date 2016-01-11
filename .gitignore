@@ -8,5 +8,4 @@ examples/**/*.js
 build/
 .idea/
 npm-debug.log
-dist/
 .coveralls.yml

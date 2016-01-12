@@ -9,7 +9,6 @@ This is an alpha release, use at your own risk!
 ### Warnings
  * no documentation, you'll have to read the source
  * no tests
- * there are issues with the build
 
 
 ### Live Demo
@@ -34,13 +33,12 @@ Here is the [live demo](http://musician-peggy-71735.bitballoon.com/), and [sourc
  * auto-scroll to newest message when appropriate (pinning)
  * auto-correct scroll jitter when content resizes or is added above/below the focus point
  * configurable loading spinner
- * use webpack
  * optimize for mobile (but it works)
 
 
 There are probably more features missing. Please open an issue!
 
-Please [let me know](https://twitter.com/dustingetz) if you use this, if this project is valued I will invest more time in it.
+Please [let me know](https://twitter.com/dustingetz) if you use this, if this project is valued I will invest more time in it. Seriously, please, if you're reading this and want to use it, tweet me.
 
 
 This work originated as a fork and modifications of [seatgeek/react-infinite](https://github.com/seatgeek/react-infinite), and was subsequently rewritten several times.

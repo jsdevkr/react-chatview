@@ -13,7 +13,7 @@
     "url": "https://github.com/dustingetz/react-chatview"
   },
   "keywords": ["react", "chat", "scroll", "infinite"],
-  "browser": "src/react-chatview.js",
+  "browser": "dist/react-chatview.js",
   "dependencies": {
     "lodash.clone": "^3.0.0"
   },

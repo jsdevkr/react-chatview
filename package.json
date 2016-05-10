@@ -6,7 +6,7 @@
   "license": "BSD",
   "scripts": {
     "build": "webpack",
-    "dist": "webpack --config webpack.dist.js"
+    "dist": "NODE_ENV=prod webpack --config webpack.dist.js"
   },
   "repository": {
     "type": "git",

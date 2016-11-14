@@ -121,6 +121,14 @@ var ChatView = React.createClass({
         ? scrollableDomEl.scrollHeight - (this.scrollHeight || 0)
         : 0);
 
+    // if scrollHeightDifference is > 0 then something was removed from list
+    var scrollHeightDifference = this.scrollHeight ? this.scrollHeight - scrollableDomEl.scrollHeight : 0;
+
+    // if something was removed from list we need to include this difference in new scroll top
+    if (this.props.flipped && scrollHeightDifference > 0) {
+        newScrollTop += scrollHeightDifference;
+    }
+
     if (newScrollTop !== scrollableDomEl.scrollTop) {
       scrollableDomEl.scrollTop = newScrollTop;
     }

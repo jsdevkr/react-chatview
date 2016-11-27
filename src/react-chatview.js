@@ -37,9 +37,6 @@ var ChatView = React.createClass({
 
   render () {
     var displayables = clone(this.props.children);
-    if (this.props.flipped) {
-      displayables.reverse();
-    }
 
     var loadSpinner = <div ref="loadingSpinner">
       {this.state.isInfiniteLoading ? this.props.loadingSpinnerDelegate : null}
@@ -70,6 +67,8 @@ var ChatView = React.createClass({
         p.then(() => this.setState({ isInfiniteLoading: false }));
       }
       // the dom is ahead of the state
+      this.updateScrollTop(domNode.scrollHeight !== this.scrollHeight);
+    } else if {
       this.updateScrollTop();
     }
     this.rafRequestId = window.requestAnimationFrame(this.pollScroll);

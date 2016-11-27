@@ -68,7 +68,7 @@ var ChatView = React.createClass({
       }
       // the dom is ahead of the state
       this.updateScrollTop(domNode.scrollHeight !== this.scrollHeight);
-    } else if {
+    } else if (domNode.scrollHeight !== this.scrollHeight) {
       this.updateScrollTop();
     }
     this.rafRequestId = window.requestAnimationFrame(this.pollScroll);

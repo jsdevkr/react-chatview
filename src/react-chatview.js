@@ -10,7 +10,7 @@ var ChatView = React.createClass({
     onInfiniteLoad: React.PropTypes.func.isRequired,
     loadingSpinnerDelegate: React.PropTypes.element,
     className: React.PropTypes.string,
-    shouldScroll: React.PropTypes.bool,
+    enableAutoScroll: React.PropTypes.bool,
   },
 
   getDefaultProps () {
@@ -19,7 +19,7 @@ var ChatView = React.createClass({
       scrollLoadThreshold: 10,
       loadingSpinnerDelegate: <div/>,
       className: '',
-      shouldScroll: true,
+      enableAutoScroll: true,
     };
   },
 
@@ -115,7 +115,7 @@ var ChatView = React.createClass({
   },
 
   updateScrollTop() {
-    if (this.props.shouldScroll) {
+    if (this.props.enableAutoScroll) {
       var scrollableDomEl = ReactDOM.findDOMNode(this);
 
       //todo this is only the happy path

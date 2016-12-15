@@ -9,7 +9,8 @@ var ChatView = React.createClass({
     scrollLoadThreshold: React.PropTypes.number,
     onInfiniteLoad: React.PropTypes.func.isRequired,
     loadingSpinnerDelegate: React.PropTypes.element,
-    className: React.PropTypes.string
+    className: React.PropTypes.string,
+    shouldScroll: React.PropTypes.bool,
   },
 
   getDefaultProps () {
@@ -17,7 +18,8 @@ var ChatView = React.createClass({
       flipped: false,
       scrollLoadThreshold: 10,
       loadingSpinnerDelegate: <div/>,
-      className: ''
+      className: '',
+      shouldScroll: true,
     };
   },
 
@@ -113,19 +115,21 @@ var ChatView = React.createClass({
   },
 
   updateScrollTop() {
-    var scrollableDomEl = ReactDOM.findDOMNode(this);
+    if (this.props.shouldScroll) {
+      var scrollableDomEl = ReactDOM.findDOMNode(this);
 
-    //todo this is only the happy path
-    var newScrollTop = scrollableDomEl.scrollTop + (this.props.flipped
-        ? scrollableDomEl.scrollHeight - (this.scrollHeight || 0)
-        : 0);
+      //todo this is only the happy path
+      var newScrollTop = scrollableDomEl.scrollTop + (this.props.flipped
+          ? scrollableDomEl.scrollHeight - (this.scrollHeight || 0)
+          : 0);
 
-    if (newScrollTop !== scrollableDomEl.scrollTop) {
-      scrollableDomEl.scrollTop = newScrollTop;
+      if (newScrollTop !== scrollableDomEl.scrollTop) {
+        scrollableDomEl.scrollTop = newScrollTop;
+      }
+
+      this.scrollTop = scrollableDomEl.scrollTop;
+      this.scrollHeight = scrollableDomEl.scrollHeight;
     }
-
-    this.scrollTop = scrollableDomEl.scrollTop;
-    this.scrollHeight = scrollableDomEl.scrollHeight;
 
     // Setting scrollTop can halt user scrolling (and disables hardware acceleration)
 

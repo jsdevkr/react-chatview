@@ -102,7 +102,9 @@ var ChatView = React.createClass({
         : 0;
 
     scrollableDomEl.scrollTop = heightDifference;
-    this.scrollTop = heightDifference;
+    if (this.props.enableAutoScroll) {
+      this.scrollTop = heightDifference;
+    }
     this.rafRequestId = window.requestAnimationFrame(this.pollScroll);
   },
 

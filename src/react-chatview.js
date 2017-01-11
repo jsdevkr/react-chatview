@@ -93,18 +93,18 @@ var ChatView = React.createClass({
   },
 
   componentDidMount () {
-    var scrollableDomEl = ReactDOM.findDOMNode(this);
-
-    // If there are not yet any children (they are still loading),
-    // this is a no-op as we are at both the top and bottom of empty viewport
-    var heightDifference = this.props.flipped
-        ? scrollableDomEl.scrollHeight - scrollableDomEl.clientHeight
-        : 0;
-
-    scrollableDomEl.scrollTop = heightDifference;
     if (this.props.enableAutoScroll) {
+      var scrollableDomEl = ReactDOM.findDOMNode(this);
+      // If there are not yet any children (they are still loading),
+      // this is a no-op as we are at both the top and bottom of empty viewport
+      var heightDifference = this.props.flipped
+          ? scrollableDomEl.scrollHeight - scrollableDomEl.clientHeight
+          : 0;
+
+      scrollableDomEl.scrollTop = heightDifference;
       this.scrollTop = heightDifference;
     }
+
     this.rafRequestId = window.requestAnimationFrame(this.pollScroll);
   },
 

@@ -13,11 +13,9 @@ Here is the [live demo](http://musician-peggy-71735.bitballoon.com/), and [sourc
 ### Why another infinite scroll component? 
 
 As of time of this writing, other efforts are missing killer features:
- * browser layout & resize "just works" (arbitrary height elements and container, no need to know heights in advance)
+ * browser layout & resize "just works" (no need to know any heights in advance)
  * Works as newsfeed (infinite load down) or chat (infinite load up) 
- * hardware accelerated scrolling
- 
-This project is also only 100 lines of code :) 
+ * hardware accelerated scrolling 
 
 This work originated as a fork and modifications of [seatgeek/react-infinite](https://github.com/seatgeek/react-infinite), and was subsequently rewritten several times.
 

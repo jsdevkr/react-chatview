@@ -14,6 +14,8 @@ As of time of this writing, other efforts are missing killer features:
  * arbitrary browser layout & resize "just works" (arbitrary height elements and container, no need to know heights in advance)
  * Works as newsfeed (infinite load down) or chat (infinite load up) 
  * hardware accelerated scrolling
+ 
+This project is also only 100 lines of code :) 
 
 This work originated as a fork and modifications of [seatgeek/react-infinite](https://github.com/seatgeek/react-infinite), and was subsequently rewritten several times.
 

@@ -11,7 +11,7 @@ Here is the [live demo](http://musician-peggy-71735.bitballoon.com/), and [sourc
 ### Why another infinite scroll component? 
 
 As of time of this writing, other efforts are missing killer features:
- * arbitrary browser layout & resize "just works" (arbitrary height elements and container, no need to know heights in advance)
+ * browser layout & resize "just works" (arbitrary height elements and container, no need to know heights in advance)
  * Works as newsfeed (infinite load down) or chat (infinite load up) 
  * hardware accelerated scrolling
  

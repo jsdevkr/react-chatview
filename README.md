@@ -3,6 +3,8 @@ react-chatview
 
 > Infinite scroll chat or feed component for React.js
 
+[Changelog](CHANGELOG.md)
+
 ### Live Demo
 [![Live Demo](screenshot.png?raw=true)](http://musician-peggy-71735.bitballoon.com/)
 

@@ -7,7 +7,7 @@ var ChatView = React.createClass({
   propTypes: {
     flipped: React.PropTypes.bool,
     scrollLoadThreshold: React.PropTypes.number,
-    onInfiniteLoad: React.PropTypes.func.isRequired,
+    onInfiniteLoad: React.PropTypes.func,
     loadingSpinnerDelegate: React.PropTypes.element,
     className: React.PropTypes.string,
     enableAutoScroll: React.PropTypes.bool,
@@ -63,7 +63,7 @@ var ChatView = React.createClass({
   pollScroll () {
     var domNode = ReactDOM.findDOMNode(this);
     if (domNode.scrollTop !== this.scrollTop) {
-      if (this.shouldTriggerLoad(domNode)) {
+      if (this.shouldTriggerLoad(domNode) && this.props.onInfiniteLoad) {
         this.setState({ isInfiniteLoading: true });
         var p = this.props.onInfiniteLoad();
         p.then(() => this.setState({ isInfiniteLoading: false }));

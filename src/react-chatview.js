@@ -5,6 +5,7 @@ import clone from 'lodash.clone';
 var ChatView = React.createClass({
 
   propTypes: {
+    domNode: React.PropTypes.object,
     flipped: React.PropTypes.bool,
     scrollLoadThreshold: React.PropTypes.number,
     onInfiniteLoad: React.PropTypes.func,
@@ -47,8 +48,7 @@ var ChatView = React.createClass({
     // Must not hook onScroll event directly - that will break hardware accelerated scrolling.
     // We poll it with requestAnimationFrame instead.
     return (
-      <div className={this.props.className} ref="scrollable"
-           style={{overflowX: 'hidden', overflowY: 'scroll'}}>
+      <div className={this.props.className} ref="scrollable">
         <div ref="smoothScrollingWrapper">
           {this.props.flipped ? loadSpinner : null}
           {displayables}
@@ -61,7 +61,7 @@ var ChatView = React.createClass({
   // detect when dom has changed underneath us- either scrollTop or scrollHeight (layout reflow)
   // may have changed.
   pollScroll () {
-    var domNode = ReactDOM.findDOMNode(this);
+    var domNode = this.props.domNode || ReactDOM.findDOMNode(this);
     if (domNode.scrollTop !== this.scrollTop) {
       if (this.shouldTriggerLoad(domNode) && this.props.onInfiniteLoad) {
         this.setState({ isInfiniteLoading: true });
@@ -94,7 +94,7 @@ var ChatView = React.createClass({
 
   componentDidMount () {
     if (this.props.enableAutoScroll) {
-      var scrollableDomEl = ReactDOM.findDOMNode(this);
+      var scrollableDomEl = this.props.domNode || ReactDOM.findDOMNode(this);
       // If there are not yet any children (they are still loading),
       // this is a no-op as we are at both the top and bottom of empty viewport
       var heightDifference = this.props.flipped
@@ -118,7 +118,7 @@ var ChatView = React.createClass({
 
   updateScrollTop() {
     if (this.props.enableAutoScroll) {
-      var scrollableDomEl = ReactDOM.findDOMNode(this);
+      var scrollableDomEl = this.props.domNode || ReactDOM.findDOMNode(this);
 
       //todo this is only the happy path
       var newScrollTop = scrollableDomEl.scrollTop + (this.props.flipped

@@ -138,7 +138,7 @@ var ChatView = React.createClass({
   updateScrollTop() {
     var scrollableDomEl = ReactDOM.findDOMNode(this);
 
-    //todo this is only the happy path
+    // todo this is only the happy path
     var newScrollTop = scrollableDomEl.scrollTop + (this.props.flipped
         ? scrollableDomEl.scrollHeight - (this.scrollHeight || 0)
         : 0);
@@ -148,10 +148,15 @@ var ChatView = React.createClass({
 
     // if something was removed from list we need to include this difference in new scroll top
     if (this.props.flipped && scrollHeightDifference > 0) {
-        newScrollTop += scrollHeightDifference;
+      newScrollTop += scrollHeightDifference;
     }
 
-    if (newScrollTop !== scrollableDomEl.scrollTop) {
+    // Chrome 57+ readjusts scrollTop when scrollHeight changes.
+    // We need to detect this in order to suppress changing it manually.    
+    var scrollTopDifference = this.scrollTop ? this.scrollTop - scrollableDomEl.scrollTop : 0;
+
+    if (scrollTopDifference !== scrollHeightDifference &&
+        newScrollTop !== scrollableDomEl.scrollTop) {
       scrollableDomEl.scrollTop = newScrollTop;
     }
 

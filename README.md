@@ -3,33 +3,35 @@ react-chatview
 
 > Infinite scroll chat or feed component for React.js
 
-This is an alpha release, use at your own risk!
-
-
-### Warnings
- * no documentation, you'll have to read the source
- * no tests
-
+[Changelog](CHANGELOG.md)
 
 ### Live Demo
 [![Live Demo](screenshot.png?raw=true)](http://musician-peggy-71735.bitballoon.com/)
 
 Here is the [live demo](http://musician-peggy-71735.bitballoon.com/), and [source code to the live demo](https://github.com/dustingetz/messages), also [here is a simpler fiddle](https://jsfiddle.net/dustingetz/xvqzw747/).
 
+### Why another infinite scroll component? 
 
-### Features
- * works as newsfeed or chat (infinite load down, infinite load up)
- * hardware accelerated scrolling
- * arbitrary height elements (react-infinite needs to know element heights in advance)
- * arbitrary height container (react-infinite needs to know container height in advance)
- * arbitrary browser layout & resize "just works"
+As of time of this writing, other efforts are missing killer features:
+ * browser layout & resize "just works" (no need to know any heights in advance)
+ * Works as newsfeed (infinite load down) or chat (infinite load up) 
+ * hardware accelerated scrolling 
 
+This work originated as a fork and modifications of [seatgeek/react-infinite](https://github.com/seatgeek/react-infinite), and was subsequently rewritten several times.
 
-### Mis-features
+### Documentation
+
+It is really easy to use. The actual rows of content should be passed as **children**. There are four interesting props:
+ * `className` extra css class string for the container
+ * `flipped` true for chat (newest at bottom), regular for newsfeed (newest at top)
+ * `scrollLoadThreshold` pixel distance from top that triggers an infinite load
+ * `onInfiniteLoad` load request callback, should cause a state change which renders more children
+
+See the [jsfiddle example](https://jsfiddle.net/dustingetz/xvqzw747/) for a complete working example.
+
+### Todo
+
  * Not actually infinite - currently all elements that have been loaded remain the dom
-
-
-### Things that will eventually work
  * auto-scroll to newest message when appropriate (pinning)
  * auto-correct scroll jitter when content resizes or is added above/below the focus point
  * configurable loading spinner
@@ -38,7 +40,6 @@ Here is the [live demo](http://musician-peggy-71735.bitballoon.com/), and [sourc
 
 There are probably more features missing. Please open an issue!
 
-Please [let me know](https://twitter.com/dustingetz) if you use this, if this project is valued I will invest more time in it. Seriously, please, if you're reading this and want to use it, tweet me.
+### Please write me if you use this! :)
 
-
-This work originated as a fork and modifications of [seatgeek/react-infinite](https://github.com/seatgeek/react-infinite), and was subsequently rewritten several times.
+If this project is valued I will invest more time in it.

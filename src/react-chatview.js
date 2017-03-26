@@ -18,6 +18,8 @@ var ChatView = React.createClass({
     flipped: React.PropTypes.bool,
     scrollLoadThreshold: React.PropTypes.number,
     onInfiniteLoad: React.PropTypes.func.isRequired,
+    usePropLoading: React.PropTypes.bool,
+    isInfiniteLoading: React.PropTypes.bool,
     loadingSpinnerDelegate: React.PropTypes.element,
     className: React.PropTypes.string
   },
@@ -26,6 +28,7 @@ var ChatView = React.createClass({
     return {
       flipped: false,
       scrollLoadThreshold: 10,
+      usePropLoading: false,
       loadingSpinnerDelegate: <div/>,
       className: ''
     };
@@ -52,7 +55,7 @@ var ChatView = React.createClass({
     }
 
     var loadSpinner = <div ref="loadingSpinner">
-      {this.state.isInfiniteLoading ? this.props.loadingSpinnerDelegate : null}
+      {this.getIsInfiniteLoading() ? this.props.loadingSpinnerDelegate : null}
     </div>;
 
     return (
@@ -67,15 +70,23 @@ var ChatView = React.createClass({
     );
   },
 
+  getIsInfiniteLoading() {
+    return this.props.usePropLoading ? this.props.isInfiniteLoading : this.state.isInfiniteLoading;
+  },
+
   // detect when dom has changed underneath us- either scrollTop or scrollHeight (layout reflow)
   // may have changed.
   onScroll() {
     var domNode = ReactDOM.findDOMNode(this);
     if (domNode.scrollTop !== this.scrollTop) {
       if (this.shouldTriggerLoad(domNode)) {
-        this.setState({ isInfiniteLoading: true });
+        if (!this.props.usePropLoading) {
+          this.setState({ isInfiniteLoading: true });
+        }
         var p = this.props.onInfiniteLoad();
-        p.then(() => this.setState({ isInfiniteLoading: false }));
+        if (!this.props.usePropLoading) {
+          p.then(() => this.setState({ isInfiniteLoading: false }));
+        }
       }
       // the dom is ahead of the state
       this.updateScrollTop();
@@ -100,7 +111,7 @@ var ChatView = React.createClass({
         domNode.scrollTop,
         domNode.scrollHeight,
         domNode.clientHeight);
-    return passedThreshold && !this.state.isInfiniteLoading;
+    return passedThreshold && !this.getIsInfiniteLoading();
   },
 
   componentDidMount () {

@@ -17,6 +17,7 @@ var ChatView = React.createClass({
   propTypes: {
     flipped: React.PropTypes.bool,
     scrollLoadThreshold: React.PropTypes.number,
+    shouldTriggerLoad: React.PropTypes.func,
     onInfiniteLoad: React.PropTypes.func.isRequired,
     loadingSpinnerDelegate: React.PropTypes.element,
     className: React.PropTypes.string
@@ -26,6 +27,7 @@ var ChatView = React.createClass({
     return {
       flipped: false,
       scrollLoadThreshold: 10,
+      shouldTriggerLoad: function() { return true; },
       loadingSpinnerDelegate: <div/>,
       className: ''
     };
@@ -100,7 +102,7 @@ var ChatView = React.createClass({
         domNode.scrollTop,
         domNode.scrollHeight,
         domNode.clientHeight);
-    return passedThreshold && !this.state.isInfiniteLoading;
+    return passedThreshold && !this.state.isInfiniteLoading && this.props.shouldTriggerLoad();
   },
 
   componentDidMount () {

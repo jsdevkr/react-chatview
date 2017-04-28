@@ -39,7 +39,7 @@ See the [jsfiddle example](https://jsfiddle.net/dustingetz/xvqzw747/) for a comp
  * Not actually infinite - currently all elements that have been loaded remain the dom
  * auto-scroll to newest message when appropriate (pinning)
  
- > use `returnScrollable` and set `scrollable.scrollTop` to `scrollable.scrollHeight`
+	> use `returnScrollable` and set `scrollable.scrollTop` to `scrollable.scrollHeight`
  
  * auto-correct scroll jitter when content resizes or is added above/below the focus point
  * configurable loading spinner

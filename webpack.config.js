@@ -14,20 +14,19 @@ module.exports = {
   },
 
   resolve: {
-    extensions: ['', '.js'],
-    root: [
-      path.resolve('./src')
-    ],
-    modulesDirectories: ['node_modules']
+    modules: [
+      path.join(__dirname, "src"),
+      "node_modules"
+    ]
   },
 
   plugins: [
-    new webpack.NoErrorsPlugin()
+    new webpack.NoEmitOnErrorsPlugin()
   ],
 
   module: {
-    loaders: [
-      {test: /\.js$/, loaders: ['babel'], include: path.resolve('./src')}
+    rules: [
+      { test: /\.js$/, use: ['babel-loader'], include: path.resolve('./src') }
     ]
   },
 

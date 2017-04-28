@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { clone } from 'lodash';
 
 let supportsPassive = false;
@@ -14,11 +15,13 @@ try {
 export default class ChatView extends Component {
   static propTypes = {
     flipped: PropTypes.bool,
+    reversed: PropTypes.bool,
     scrollLoadThreshold: PropTypes.number,
     onInfiniteLoad: PropTypes.func.isRequired,
     loadingSpinnerDelegate: PropTypes.element,
     className: PropTypes.string,
     children: PropTypes.node,
+    returnScrollable: PropTypes.func,
   };
 
   constructor(props) {
@@ -53,6 +56,9 @@ export default class ChatView extends Component {
     } else {
       this.rafRequestId = window.requestAnimationFrame(this.pollScroll);
     }
+
+    // upper ref
+    if (typeof this.props.returnScrollable === 'function') this.props.returnScrollable(this.scrollable);
   }
 
   // componentDidUpdate(prevProps, prevState) {
@@ -132,7 +138,7 @@ export default class ChatView extends Component {
 
   render() {
     const displayables = clone(this.props.children);
-    if (this.props.flipped) {
+    if (this.props.flipped && !this.props.reversed) {
       displayables.reverse();
     }
 
@@ -142,7 +148,7 @@ export default class ChatView extends Component {
 
     return (
       <div className={this.props.className} ref={e => { this.scrollable = e; }}
-        style={{ overflowX: 'hidden', overflowY: 'scroll' }}
+        style={{ overflowX: 'hidden', overflowY: 'auto' }}
       >
         <div ref={e => { this.smoothScrollingWrapper = e; }}>
           {this.props.flipped ? loadSpinner : null}

@@ -1,5 +1,7 @@
-react-chatview
-==============
+react-chatview-es6
+==================
+
+> is forked from [dustingetz/react-chatview](https://github.com/dustingetz/react-chatview) Thank you dustingetz!
 
 > Infinite scroll chat or feed component for React.js
 
@@ -22,10 +24,13 @@ This work originated as a fork and modifications of [seatgeek/react-infinite](ht
 ### Documentation
 
 It is really easy to use. The actual rows of content should be passed as **children**. There are four interesting props:
+
  * `className` extra css class string for the container
  * `flipped` true for chat (newest at bottom), regular for newsfeed (newest at top)
+ * `reversed` true for don't reverse elements
  * `scrollLoadThreshold` pixel distance from top that triggers an infinite load
  * `onInfiniteLoad` load request callback, should cause a state change which renders more children
+ * `returnScrollable` return scollable object for scrollable event handling
 
 See the [jsfiddle example](https://jsfiddle.net/dustingetz/xvqzw747/) for a complete working example.
 
@@ -33,6 +38,9 @@ See the [jsfiddle example](https://jsfiddle.net/dustingetz/xvqzw747/) for a comp
 
  * Not actually infinite - currently all elements that have been loaded remain the dom
  * auto-scroll to newest message when appropriate (pinning)
+ 
+ > use `returnScrollable` and set `scrollable.scrollTop` to `scrollable.scrollHeight`
+ 
  * auto-correct scroll jitter when content resizes or is added above/below the focus point
  * configurable loading spinner
  * optimize for mobile (but it works)

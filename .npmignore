@@ -1,1 +1,10 @@
-*.tgz
+.babelrc
+.eslintignore
+.eslintrc
+.gitignore
+.npmignore
+screenshot.png
+webpack.config.js
+webpack.dist.js
+lib
+src

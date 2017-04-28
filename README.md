@@ -21,6 +21,26 @@ As of time of this writing, other efforts are missing killer features:
 
 This work originated as a fork and modifications of [seatgeek/react-infinite](https://github.com/seatgeek/react-infinite), and was subsequently rewritten several times.
 
+### Getting started
+
+Install `react-chatview-es6` using npm.
+
+```shell
+npm install react-chatview-es6 --save
+```
+
+You can also use a global-friendly UMD build:
+
+```html
+<script src="path-to-react-chatview-es6/dist/react-chatview.min.js"></script>
+```
+
+You can also use a es5 commonjs build:
+
+```html
+<script src="path-to-react-chatview-es6/lib/react-chatview.js"></script>
+```
+
 ### Documentation
 
 It is really easy to use. The actual rows of content should be passed as **children**. There are four interesting props:

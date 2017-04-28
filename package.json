@@ -2,7 +2,7 @@
   "name": "react-chatview-es6",
   "version": "0.2.0",
   "description": "Infinite scroll chat or feed component for React.js",
-  "main": "lib/react-chatview.js",
+  "main": "dist/react-chatview.js",
   "jsnext:main": "src/react-chatview.js",
   "author": "Dustin Getz <dustin.getz@gmail.com> (https://github.com/dustingetz)",
   "maintainers": "Dongwoo Gim <gimdongwoo@gmail.com> (https://github.com/gimdongwoo)",

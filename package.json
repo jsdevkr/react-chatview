@@ -21,7 +21,9 @@
     "infinite"
   ],
   "dependencies": {
-    "lodash.clone": "^3.0.0"
+    "create-react-class": "^15.5.3",
+    "lodash.clone": "^3.0.0",
+    "prop-types": "^15.5.10"
   },
   "peerDependencies": {
     "react": ">= 0.14.0",

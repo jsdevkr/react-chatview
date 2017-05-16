@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import createReactClass from 'create-react-class';
 import ReactDOM from 'react-dom';
 import clone from 'lodash.clone';
 
@@ -12,14 +14,14 @@ try {
   window.addEventListener('test', null, opts);
 } catch (e) { /* pass */ }
 
-var ChatView = React.createClass({
+var ChatView = createReactClass({
 
   propTypes: {
-    flipped: React.PropTypes.bool,
-    scrollLoadThreshold: React.PropTypes.number,
-    onInfiniteLoad: React.PropTypes.func.isRequired,
-    loadingSpinnerDelegate: React.PropTypes.element,
-    className: React.PropTypes.string
+    flipped: PropTypes.bool,
+    scrollLoadThreshold: PropTypes.number,
+    onInfiniteLoad: PropTypes.func.isRequired,
+    loadingSpinnerDelegate: PropTypes.element,
+    className: PropTypes.string
   },
 
   getDefaultProps () {

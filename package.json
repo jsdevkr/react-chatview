@@ -4,7 +4,7 @@
   "description": "Infinite scroll chat or feed component for React.js",
   "main": "lib/react-chatview.js",
   "jsnext:main": "src/react-chatview.js",
-  "license": "BSD",
+  "license": "0BSD",
   "scripts": {
     "build": "webpack",
     "dist": "NODE_ENV=prod webpack --config webpack.dist.js",

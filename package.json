@@ -6,7 +6,7 @@
   "jsnext:main": "src/react-chatview.js",
   "license": "BSD",
   "scripts": {
-    "build": "webpack",
+    "build": "webpack && npm run dist && npm run lib",
     "dist": "NODE_ENV=prod webpack --config webpack.dist.js",
     "lib": "BABEL_ENV=commonjs babel src --out-dir lib"
   },

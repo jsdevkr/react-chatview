@@ -27,7 +27,16 @@ module.exports = {
 
   module: {
     loaders: [
-      {test: /\.js$/, loaders: ['babel'], include: path.resolve('./src')}
+      {
+        test: /\.js$/,
+        include: path.resolve('./src'),
+        exclude: /node_modules/,
+        loader: 'babel-loader',
+        query: {
+          plugins: ['transform-runtime'],
+          presets: ['es2015', 'react']
+        }
+      }
     ]
   },
 

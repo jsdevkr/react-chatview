@@ -25,7 +25,9 @@ It is really easy to use. The actual rows of content should be passed as **child
  * `className` extra css class string for the container
  * `flipped` true for chat (newest at bottom), regular for newsfeed (newest at top)
  * `scrollLoadThreshold` pixel distance from top that triggers an infinite load
- * `onInfiniteLoad` load request callback, should cause a state change which renders more children
+ * `onInfiniteLoad` load request callback, should cause a state change which renders more children. Must return a promise when `usePropLoading=false`
+ * `usePropLoading` false(default) uses a promise returned from the `onInfiniteLoad` callback, true requires the user to set `isInfiniteLoading`
+ * `isInfiniteLoading` indicates whether loading is currently in progress when using `usePropLoading=true`
 
 See the [jsfiddle example](https://jsfiddle.net/dustingetz/xvqzw747/) for a complete working example.
 

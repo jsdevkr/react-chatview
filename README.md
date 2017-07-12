@@ -25,6 +25,7 @@ It is really easy to use. The actual rows of content should be passed as **child
  * `className` extra css class string for the container
  * `flipped` true for chat (newest at bottom), regular for newsfeed (newest at top)
  * `scrollLoadThreshold` pixel distance from top that triggers an infinite load
+ * `shouldTriggerLoad` callback function to check if chat view should trigger infinite load cycle when scroll passed `scrollLoadThreshold`. This callback is optional and by default  `onInfiniteLoad` is always triggered. 
  * `onInfiniteLoad` load request callback, should cause a state change which renders more children
 
 See the [jsfiddle example](https://jsfiddle.net/dustingetz/xvqzw747/) for a complete working example.

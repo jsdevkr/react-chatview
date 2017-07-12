@@ -17,6 +17,7 @@ export default class ChatView extends Component {
     flipped: PropTypes.bool,
     reversed: PropTypes.bool,
     scrollLoadThreshold: PropTypes.number,
+    shouldTriggerLoad: PropTypes.func,
     onInfiniteLoad: PropTypes.func.isRequired,
     loadingSpinnerDelegate: PropTypes.element,
     className: PropTypes.string,
@@ -105,7 +106,7 @@ export default class ChatView extends Component {
         this.scrollable.scrollTop,
         this.scrollable.scrollHeight,
         this.scrollable.clientHeight);
-    return passedThreshold && !this.state.isInfiniteLoading;
+    return passedThreshold && !this.state.isInfiniteLoading && this.props.shouldTriggerLoad();
   }
 
   updateScrollTop() {
@@ -163,6 +164,7 @@ export default class ChatView extends Component {
 ChatView.defaultProps = {
   flipped: false,
   scrollLoadThreshold: 10,
+  shouldTriggerLoad: () => { return true; },
   loadingSpinnerDelegate: <div />,
   className: ''
 };

@@ -8,7 +8,7 @@ react-chatview
 ### Live Demo
 [![Live Demo](screenshot.png?raw=true)](http://musician-peggy-71735.bitballoon.com/)
 
-Here is the [live demo](http://musician-peggy-71735.bitballoon.com/), and [source code to the live demo](https://github.com/dustingetz/messages), also [here is a simpler fiddle](https://jsfiddle.net/dustingetz/xvqzw747/).
+Here is the [live demo](http://musician-peggy-71735.bitballoon.com/), and [source code to the live demo](https://github.com/dustingetz/messages), also [here is a simpler fiddle](https://jsfiddle.net/gimdongwoo/xo4fccbu/).
 
 ### Why another infinite scroll component?
 
@@ -51,7 +51,7 @@ It is really easy to use. The actual rows of content should be passed as **child
  * `onInfiniteLoad` load request callback, should cause a state change which renders more children
  * `returnScrollable` return scollable object for scrollable event handling
 
-See the [jsfiddle example](https://jsfiddle.net/dustingetz/xvqzw747/) for a complete working example.
+See the [jsfiddle example](https://jsfiddle.net/gimdongwoo/xo4fccbu/) for a complete working example.
 
 ### Todo
 

@@ -9,3 +9,4 @@ build/
 .idea/
 npm-debug.log
 .coveralls.yml
+*.tgz

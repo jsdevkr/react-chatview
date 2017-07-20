@@ -1,0 +1,54 @@
+{ "extends": "eslint-config-airbnb",
+  "env": {
+    "browser": true,
+    "node": true,
+    "mocha": true
+  },
+  "rules": {
+    "new-cap": [2, { "capIsNewExceptions": ["List", "Map", "Set", "Router"] }],
+    "react/no-multi-comp": 0,
+    "import/default": 0,
+    "import/no-duplicates": 0,
+    "import/named": 0,
+    "import/namespace": 0,
+    "import/no-unresolved": 0,
+    "import/no-named-as-default": 2,
+    "comma-dangle": 0,  // not sure why airbnb turned this on. gross!
+    "indent": [2, 2, {"SwitchCase": 1}],
+    "no-console": 0,
+    "no-alert": 0,
+    "import/no-extraneous-dependencies": 0,
+    "no-underscore-dangle": 0,
+    "react/jsx-filename-extension": 0,
+    "react/jsx-first-prop-new-line": 0,
+    "max-len": 0,
+    "global-require": 0,
+    "arrow-parens": 0,
+    "no-param-reassign": 0,
+    "prefer-template": 0,
+    "import/extensions": 0,
+    "react/jsx-space-before-closing": 0,
+    "arrow-body-style": 0,
+    "react/prefer-stateless-function": 0,
+    "jsx-a11y/anchor-has-content": 0,
+    "jsx-a11y/no-static-element-interactions": 0,
+    "consistent-return": 0,
+    "no-plusplus": 0,
+    "prefer-arrow-callback": 0,
+    "func-names": 0,
+    "no-unneeded-ternary": 0,
+    "react/require-default-props": 0,
+    "jsx-a11y/href-no-hash": 0
+  },
+  "parser": "babel-eslint",
+  "plugins": [
+    "react", "import"
+  ],
+  "settings": {
+    "import/resolve": {
+      "moduleDirectory": ["node_modules", "src"]
+    }
+  },
+  "globals": {
+  }
+}

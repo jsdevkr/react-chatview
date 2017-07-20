@@ -1,4 +1,7 @@
 {
   "presets": ["react", "es2015"],
-  "plugins": ["transform-class-properties"]
+  "plugins": [
+    "add-module-exports",
+    "transform-class-properties"
+  ]
 }

@@ -8,7 +8,7 @@ react-chatview
 ### Live Demo
 [![Live Demo](screenshot.png?raw=true)](http://musician-peggy-71735.bitballoon.com/)
 
-Here is the [live demo](http://musician-peggy-71735.bitballoon.com/), and [source code to the live demo](https://github.com/dustingetz/messages), also [here is a simpler fiddle](https://jsfiddle.net/gimdongwoo/xo4fccbu/).
+Here is the [live demo](http://musician-peggy-71735.bitballoon.com/), and [source code to the live demo](https://github.com/jsdevkr/react-chatview-sample), also [here is a simpler fiddle](https://jsfiddle.net/gimdongwoo/xo4fccbu/).
 
 ### Why another infinite scroll component?
 

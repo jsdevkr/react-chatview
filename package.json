@@ -1,6 +1,6 @@
 {
   "name": "react-chatview",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Infinite scroll chat or feed component for React.js",
   "main": "dist/react-chatview.js",
   "jsnext:main": "src/react-chatview.js",

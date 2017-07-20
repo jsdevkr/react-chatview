@@ -1,5 +1,5 @@
-0.2.1
- * Refactoring to es6 class syntax, dependencies updated (react 15)
+0.2.2
+ * Refactoring to es6 class syntax, dependencies updated (react 15) #17
  * Add 'reversed' property.
  * Add 'returnScrollable' method.
 

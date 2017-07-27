@@ -1,3 +1,6 @@
+0.2.3
+ * fix lodash.clone import #27
+
 0.2.2
  * Refactoring to es6 class syntax, dependencies updated (react 15) #17
  * Add 'reversed' property.

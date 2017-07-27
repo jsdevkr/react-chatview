@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { clone } from 'lodash';
+import clone from 'lodash.clone';
 
 let supportsPassive = false;
 try {

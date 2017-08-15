@@ -1,3 +1,6 @@
+0.2.4
+ * Remove src directory from .npmigore #29
+
 0.2.3
  * fix lodash.clone import #27
 

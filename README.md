@@ -1,6 +1,8 @@
 react-chatview
 ==============
 
+[![npm version](https://badge.fury.io/js/react-chatview.svg)](https://badge.fury.io/js/react-chatview)
+
 > Infinite scroll chat or feed component for React.js
 
 [Changelog](CHANGELOG.md)

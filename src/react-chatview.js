@@ -43,8 +43,8 @@ export default class ChatView extends Component {
     // If there are not yet any children (they are still loading),
     // this is a no-op as we are at both the top and bottom of empty viewport
     const heightDifference = this.props.flipped
-        ? this.scrollable.scrollHeight - this.scrollable.clientHeight
-        : 0;
+      ? this.scrollable.scrollHeight - this.scrollable.clientHeight
+      : 0;
 
     this.scrollable.scrollTop = heightDifference;
     this.scrollTop = heightDifference;
@@ -88,32 +88,32 @@ export default class ChatView extends Component {
     }
   }
 
-  pollScroll() {
+  pollScroll = () => {
     this.onScroll();
     this.rafRequestId = window.requestAnimationFrame(this.pollScroll);
   }
 
   isPassedThreshold = (flipped, scrollLoadThreshold, scrollTop, scrollHeight, clientHeight) => {
     return flipped
-        ? scrollTop <= scrollLoadThreshold
-        : scrollTop >= (scrollHeight - clientHeight - scrollLoadThreshold);
+      ? scrollTop <= scrollLoadThreshold
+      : scrollTop >= (scrollHeight - clientHeight - scrollLoadThreshold);
   }
 
   shouldTriggerLoad() {
     const passedThreshold = this.isPassedThreshold(
-        this.props.flipped,
-        this.props.scrollLoadThreshold,
-        this.scrollable.scrollTop,
-        this.scrollable.scrollHeight,
-        this.scrollable.clientHeight);
+      this.props.flipped,
+      this.props.scrollLoadThreshold,
+      this.scrollable.scrollTop,
+      this.scrollable.scrollHeight,
+      this.scrollable.clientHeight);
     return passedThreshold && !this.state.isInfiniteLoading && this.props.shouldTriggerLoad();
   }
 
   updateScrollTop() {
     // todo this is only the happy path
     let newScrollTop = this.scrollable.scrollTop + (this.props.flipped
-        ? this.scrollable.scrollHeight - (this.scrollHeight || 0)
-        : 0);
+      ? this.scrollable.scrollHeight - (this.scrollHeight || 0)
+      : 0);
 
     // if scrollHeightDifference is > 0 then something was removed from list
     const scrollHeightDifference = this.scrollHeight ? this.scrollHeight - this.scrollable.scrollHeight : 0;

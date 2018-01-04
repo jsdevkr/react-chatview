@@ -1,3 +1,6 @@
+0.2.5
+ * Fixed wrong calling context for pollScroll #37
+
 0.2.4
  * Remove src directory from .npmigore #29
 

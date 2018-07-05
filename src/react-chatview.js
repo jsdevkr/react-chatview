@@ -1,17 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import clone from 'lodash.clone';
+import PropTypes from 'prop-types';
 
 var ChatView = React.createClass({
 
   propTypes: {
-    domNode: React.PropTypes.object,
-    flipped: React.PropTypes.bool,
-    scrollLoadThreshold: React.PropTypes.number,
-    onInfiniteLoad: React.PropTypes.func,
-    loadingSpinnerDelegate: React.PropTypes.element,
-    className: React.PropTypes.string,
-    enableAutoScroll: React.PropTypes.bool,
+    domNode: PropTypes.object,
+    flipped: PropTypes.bool,
+    scrollLoadThreshold: PropTypes.number,
+    onInfiniteLoad: PropTypes.func,
+    loadingSpinnerDelegate: PropTypes.element,
+    className: PropTypes.string,
+    enableAutoScroll: PropTypes.bool,
   },
 
   getDefaultProps () {

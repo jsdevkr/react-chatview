@@ -130,6 +130,12 @@ export default class ChatView extends Component {
     this.scrollTop = this.scrollable.scrollTop;
     this.scrollHeight = this.scrollable.scrollHeight;
 
+     //Pin scroll position when new children are coming if user is not at bottom or top
+     let userIsAtBottom = this.scrollable.scrollHeight - this.scrollable.scrollTop === this.scrollable.clientHeight;
+     if(!userIsAtBottom && this.props.shouldTriggerLoad()){
+         this.scrollable.scrollTop = newScrollTop + scrollHeightDifference;
+     }
+
     // Setting scrollTop can halt user scrolling (and disables hardware acceleration)
 
     // Both cases - flipped and refular - have cases where the content expands in the proper direction,
